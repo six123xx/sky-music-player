@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' data:; script-src 'unsafe-inline'; style-src 'unsafe-inline'">
+<title>截图对齐</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+  html, body { width: 100%; height: 100%; overflow: hidden; cursor: crosshair; }
+  #shot {
+    position: fixed; inset: 0;
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: #000;
+  }
+  /* 遮罩:未点击区域变暗,已标记区域透明 */
+  .overlay-mask {
+    position: fixed; inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    pointer-events: none;
+    z-index: 2;
+  }
+  .mark {
+    position: fixed;
+    transform: translate(-50%, -50%);
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    border: 3px solid #ffd97a;
+    background: rgba(255, 120, 30, 0.35);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 15px; font-weight: 700;
+    z-index: 3;
+    pointer-events: none;
+    box-shadow: 0 0 10px rgba(255, 180, 60, 0.8);
+  }
+  .grid-line {
+    position: fixed;
+    background: rgba(255, 217, 122, 0.55);
+    z-index: 2;
+    pointer-events: none;
+  }
+  .hint {
+    position: fixed;
+    top: 14px; left: 50%;
+    transform: translateX(-50%);
+    background: rgba(12, 18, 32, 0.92);
+    border: 1px solid rgba(255, 210, 120, 0.55);
+    border-radius: 10px;
+    padding: 10px 18px;
+    color: #ffe9b0;
+    font-size: 14px;
+    font-family: "Microsoft YaHei", system-ui, sans-serif;
+    text-align: center;
+    z-index: 5;
+    max-width: 92vw;
+    line-height: 1.6;
+    pointer-events: none;
+  }
+  .hint b { color: #7fe8b0; }
+  .hint .num { display: inline-flex; width: 20px; height: 20px; border-radius: 50%; background: #ffd97a; color: #221a05; align-items: center; justify-content: center; font-weight: 700; margin: 0 2px; }
+  .actions {
+    position: fixed;
+    bottom: 22px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; gap: 12px;
+    z-index: 6;
+  }
+  .actions button {
+    border: none; outline: none; cursor: pointer;
+    font-size: 15px; font-family: inherit;
+    padding: 9px 26px;
+    border-radius: 8px;
+    font-weight: 600;
+  }
+  #doneBtn {
+    background: linear-gradient(180deg, #43c46a, #2e9d55);
+    color: #fff;
+    display: none;
+    box-shadow: 0 4px 14px rgba(46, 157, 85, 0.5);
+  }
+  #cancelBtn {
+    background: rgba(90, 110, 140, 0.4);
+    color: #dce6f5;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  }
+</style>
+</head>
+<body>
+<div id="shot"></div>
+<div class="overlay-mask" id="mask"></div>
+<div class="hint" id="hint"></div>
+<div class="actions">
+  <button id="cancelBtn">取消 (Esc)</button>
+  <button id="doneBtn">完成对齐 ✓</button>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  const api = window.captureAPI;
+  const $ = (id) => document.getElementById(id);
+  const points = [];       // 已点击的 3 个键中心(窗口坐标)
+  const LABELS = ['第一行最左键', '第一行最右键', '第三行最左键'];
+  const markEls = [];
+
+  function renderHint() {
+    const next = points.length;
+    if (next >= 3) {
+      $('hint').innerHTML = '网格已生成,请核对是否与游戏琴键重合,然后点「<b>完成对齐</b>」。<br>不满意可点击「重新标记」';
+    } else {
+      $('hint').innerHTML =
+        '依次点击光遇琴键的 <span class="num">' + (next + 1) + '</span> <b>' + LABELS[next] + '</b> 的中心:' +
+        '<br>①第一行最左 → ②第一行最右 → ③第三行最左';
+    }
+  }
+
+  function drawGrid() {
+    const p = points;
+    const cw = (p[1].x - p[0].x) / 4;
+    const rh = (p[2].y - p[0].y) / 2;
+    // 清除旧网格
+    document.querySelectorAll('.grid-line').forEach(el => el.remove());
+    // 横向行线
+    for (let r = 0; r <= 3; r++) {
+      const y = p[0].y + rh * r;
+      const line = document.createElement('div');
+      line.className = 'grid-line';
+      line.style.left = '0'; line.style.right = '0';
+      line.style.top = y + 'px'; line.style.height = '1px';
+      document.body.appendChild(line);
+    }
+    // 纵向列线
+    for (let c = 0; c <= 5; c++) {
+      const x = p[0].x + cw * c;
+      const line = document.createElement('div');
+      line.className = 'grid-line';
+      line.style.top = '0'; line.style.bottom = '0';
+      line.style.left = x + 'px'; line.style.width = '1px';
+      document.body.appendChild(line);
+    }
+    $('doneBtn').style.display = 'inline-block';
+    $('hint').innerHTML = '网格已生成,请核对是否与游戏琴键重合。<br>满意 → 点「<b>完成对齐</b>」;不准 → 按 <b>Esc</b> 重新截一次,重新标记。';
+  }
+
+  document.addEventListener('click', (e) => {
+    if (points.length >= 3) {
+      // 已满 3 点:点击只重绘网格(移动标记到新点)或者忽略
+      return;
+    }
+    const x = e.clientX, y = e.clientY;
+    points.push({ x, y });
+    const mark = document.createElement('div');
+    mark.className = 'mark';
+    mark.style.left = x + 'px';
+    mark.style.top = y + 'px';
+    mark.textContent = points.length;
+    document.body.appendChild(mark);
+    markEls.push(mark);
+    if (points.length === 3) drawGrid();
+    else renderHint();
+  });
+
+  $('cancelBtn').addEventListener('click', () => api.cancel());
+  $('doneBtn').addEventListener('click', () => api.done(points));
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') api.cancel();
+  });
+
+  api.onImage((payload) => {
+    $('shot').style.backgroundImage = 'url(' + payload.dataUrl + ')';
+    renderHint();
+  });
+})();
+</script>
+</body>
+</html>

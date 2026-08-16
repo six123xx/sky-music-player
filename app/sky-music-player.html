@@ -1189,206 +1189,6 @@
     align-items: center;
   }
 
-  /* ════════════ Practice Page (跟弹) ════════════ */
-  .practice-page {
-    max-width: 720px;
-    margin: 0 auto;
-  }
-  .practice-header { text-align: center; margin-bottom: 20px; }
-  .practice-header h2 {
-    font-family: var(--font-family-heading);
-    font-size: 1.3em;
-    margin-bottom: 6px;
-  }
-  .practice-desc {
-    font-size: 0.8em;
-    color: var(--text-dim);
-  }
-  .practice-empty {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--text-dim);
-  }
-  .practice-empty .empty-icon {
-    font-size: 3em;
-    opacity: 0.3;
-    margin-bottom: 10px;
-  }
-  .practice-empty p { margin-bottom: 14px; font-size: 0.85em; }
-  .practice-song-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 14px;
-    padding: 10px 14px;
-    background: rgba(0,0,0,0.18);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: var(--r-md);
-    font-size: 0.82em;
-  }
-  .practice-song-info span:first-child { font-weight: 600; }
-  .practice-song-info span:last-child { color: var(--text-dim); font-size: 0.9em; }
-  .practice-controls-bar {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    flex-wrap: wrap;
-    margin-bottom: 12px;
-  }
-  .practice-speed-group {
-    display: flex;
-    gap: 4px;
-  }
-  .practice-divider {
-    width: 1px;
-    height: 24px;
-    background: rgba(255,255,255,0.1);
-    margin: 0 4px;
-  }
-  .practice-btn {
-    padding: 7px 14px;
-    border-radius: var(--r-sm);
-    border: 1px solid var(--border);
-    background: var(--card);
-    color: var(--text);
-    cursor: pointer;
-    font-size: 0.78em;
-    transition: all var(--t-fast);
-    white-space: nowrap;
-  }
-  .practice-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .practice-btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
-  .practice-btn.loop-active { background: var(--accent-gold); color: #000; border-color: var(--accent-gold); }
-  .practice-progress-bar {
-    position: relative;
-    height: 8px;
-    background: rgba(255,255,255,0.06);
-    border-radius: 4px;
-    overflow: hidden;
-    margin-bottom: 8px;
-  }
-  .practice-progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--accent), var(--accent-glow));
-    border-radius: 4px;
-    transition: width 0.3s ease;
-  }
-  .practice-stats-bar {
-    display: flex;
-    gap: 18px;
-    margin-bottom: 18px;
-    font-size: 0.78em;
-    color: var(--text-dim);
-  }
-  .practice-stats-bar .stat-correct { color: #b0b0b0; }
-  .practice-stats-bar .stat-wrong { color: #a05050; }
-  .practice-instrument-grid {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    padding: 30px 0;
-    background: rgba(0,0,0,0.22);
-    border-radius: var(--r-md);
-    position: relative;
-    margin-bottom: 14px;
-  }
-  .practice-tips {
-    text-align: center;
-    font-size: 0.75em;
-    color: var(--text-dim);
-    padding: 10px;
-  }
-  .practice-viz-section {
-    margin-bottom: 14px;
-    background: rgba(15, 15, 15, 0.7);
-    border: 1px solid rgba(255,255,255,0.05);
-    border-radius: var(--r-md);
-    padding: 10px;
-    overflow: hidden;
-  }
-  .practice-viz-section .grid-scroll-wrap {
-    height: 200px;
-  }
-
-  /* Practice ball */
-  #practiceBallsContainer {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    z-index: 20;
-  }
-  .practice-ball {
-    position: absolute;
-    width: 34px; height: 34px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 35% 35%, #fff 0%, #e0e0e0 40%, #707070 100%);
-    box-shadow: 0 0 24px rgba(232,232,232,0.7), 0 0 10px rgba(232,232,232,0.9), inset 0 -3px 6px rgba(0,0,0,0.2);
-    z-index: 20;
-    pointer-events: none;
-    transform: translate(-50%, -50%);
-    transition: left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), top 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    display: none;
-  }
-  .practice-ball.visible { display: block; }
-  .practice-ball::after {
-    content: '';
-    position: absolute;
-    inset: -6px;
-    border-radius: 50%;
-    border: 2px solid rgba(232,232,232,0.3);
-    animation: practice-ring 1.5s ease-in-out infinite;
-  }
-  @keyframes practice-ring {
-    0%, 100% { transform: scale(1); opacity: 0.5; }
-    50% { transform: scale(1.3); opacity: 0; }
-  }
-  .note-btn.practice-target {
-    border-color: var(--accent) !important;
-    animation: practice-pulse 1.2s ease-in-out infinite !important;
-  }
-  @keyframes practice-pulse {
-    0%, 100% { box-shadow: 0 0 16px rgba(232,232,232,0.4), 0 0 6px rgba(232,232,232,0.6); }
-    50% { box-shadow: 0 0 28px rgba(232,232,232,0.6), 0 0 12px rgba(232,232,232,0.9); }
-  }
-  .note-btn.practice-wrong {
-    animation: practice-shake 0.4s ease !important;
-    border-color: #a05050 !important;
-  }
-  @keyframes practice-shake {
-    0%, 100% { transform: translateX(0); }
-    20% { transform: translateX(-4px); }
-    40% { transform: translateX(4px); }
-    60% { transform: translateX(-3px); }
-    80% { transform: translateX(2px); }
-  }
-  .note-btn.practice-correct {
-    animation: practice-pop 0.35s ease !important;
-  }
-  @keyframes practice-pop {
-    0% { transform: scale(1); }
-    40% { transform: scale(1.18); box-shadow: 0 0 30px rgba(200,200,200,0.8); }
-    100% { transform: scale(1); }
-  }
-  .loop-marker {
-    position: absolute;
-    top: 0; bottom: 0;
-    width: 3px;
-    z-index: 4;
-    pointer-events: none;
-  }
-  .loop-marker.marker-a { background: rgba(232,232,232,0.7); }
-  .loop-marker.marker-b { background: rgba(136,136,136,0.7); }
-  .loop-region {
-    position: absolute;
-    top: 0; bottom: 0;
-    background: rgba(232,232,232,0.08);
-    z-index: 3;
-    pointer-events: none;
-    display: none;
-  }
-  .loop-region.visible { display: block; }
-
   /* ════════════ Format Info ════════════ */
   .format-info {
     text-align: center;
@@ -1461,6 +1261,75 @@
     white-space: nowrap;
   }
   .lib-clear-btn:hover { background: rgba(208, 80, 80, 0.18); }
+
+  .lib-cat-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 4px 0 16px;
+  }
+  .lib-cat-chip {
+    padding: 6px 14px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--text-dim);
+    font-size: 0.82em;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--t-fast);
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    user-select: none;
+  }
+  .lib-cat-chip:hover { color: var(--accent); border-color: var(--accent); }
+  .lib-cat-chip.active {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: rgba(232, 232, 232, 0.1);
+  }
+  .lib-cat-chip .cat-count {
+    font-size: 0.75em;
+    opacity: 0.7;
+    font-weight: 400;
+  }
+  .lib-cat-add {
+    padding: 6px 12px;
+    background: transparent;
+    border: 1px dashed var(--border);
+    border-radius: 999px;
+    color: var(--text-dim);
+    font-size: 0.82em;
+    cursor: pointer;
+    transition: all var(--t-fast);
+    white-space: nowrap;
+  }
+  .lib-cat-add:hover { color: var(--accent); border-color: var(--accent); }
+  .lib-cat-ops {
+    display: inline-flex;
+    gap: 4px;
+    margin-left: 4px;
+    opacity: 0;
+    transition: opacity var(--t-fast);
+  }
+  .lib-cat-chip:hover .lib-cat-ops { opacity: 1; }
+  .lib-cat-ops button {
+    width: 18px; height: 18px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    color: var(--text-dim);
+    font-size: 0.68em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--t-fast);
+  }
+  .lib-cat-ops button:hover { background: var(--accent); color: var(--bg-0); }
 
   .library-grid {
     display: grid;
@@ -1559,6 +1428,30 @@
   }
   .lib-card:hover .card-share { opacity: 0.8; }
   .lib-card .card-share:hover { background: var(--accent); color: var(--bg-0); opacity: 1; }
+  .lib-card .card-cat {
+    position: absolute;
+    top: 8px;
+    left: 38px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.08);
+    color: var(--accent-soft);
+    font-size: 0.72em;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity var(--t-fast), background var(--t-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .lib-card:hover .card-cat { opacity: 0.8; }
+  .lib-card .card-cat:hover { background: var(--accent); color: var(--bg-0); opacity: 1; }
+  .lib-card .card-meta .cat-name {
+    color: var(--accent-soft);
+    background: rgba(232, 232, 232, 0.14);
+  }
 
   .cloud-toolbar {
     display: flex;
@@ -2068,8 +1961,6 @@
     .navbar { padding: 0 14px; height: 52px; }
     .nav-logo { font-size: 0.95em; }
     .nav-item { padding: 5px 12px; font-size: 0.8em; }
-    .practice-ball { width: 28px; height: 28px; }
-    .practice-btn { padding: 5px 10px; font-size: 0.7em; }
     .library-grid { grid-template-columns: 1fr; }
   }
 </style>
@@ -2085,8 +1976,8 @@
     <span class="logo-text">光遇乐谱播放器</span>
   </div>
   <div class="nav-items">
+    <button class="nav-item" data-page="practice" onclick="openPracticeOverlay()">跟弹</button>
     <button class="nav-item active" data-page="player" onclick="switchPage('player')">播放器</button>
-    <button class="nav-item" data-page="practice" onclick="switchPage('practice')">跟弹</button>
     <button class="nav-item" data-page="composer" onclick="switchPage('composer')">制谱</button>
     <button class="nav-item" data-page="library" onclick="switchPage('library')">曲库</button>
     <button class="nav-item" data-page="decrypt" onclick="switchPage('decrypt')">解密</button>
@@ -2103,26 +1994,6 @@
 
   <!-- ===== Player Page ===== -->
   <div class="page active" id="page-player">
-    <!-- Upload Area -->
-    <div class="upload-area" id="uploadArea">
-      <div class="upload-icon">♫</div>
-      <h3>拖放光遇乐谱文件到此处</h3>
-      <p>支持 JSON / TXT 格式的光遇乐谱文件</p>
-      <div class="format-badge">.json</div>
-      <div class="format-badge">.txt</div>
-      <div class="format-badge">ABC1/5</div>
-    </div>
-    <input type="file" id="fileInput" accept=".json,.txt" style="display:none;">
-
-    <!-- Paste Area -->
-    <div class="paste-section">
-      <span class="paste-toggle" id="pasteToggle">▼ 或粘贴 JSON 文本</span>
-      <div class="paste-area" id="pasteArea">
-        <textarea id="pasteTextarea" placeholder="在此粘贴光遇乐谱 JSON 内容..."></textarea>
-        <button class="paste-load-btn" id="pasteLoadBtn">加载乐谱</button>
-      </div>
-    </div>
-
     <!-- Player -->
     <div class="player active" id="player">
       <!-- Song list bar -->
@@ -2324,6 +2195,27 @@
         <button class="lib-import-btn" id="libImportBtn">导入乐谱文件</button>
         <button class="lib-clear-btn" id="libClearBtn">清空曲库</button>
       </div>
+      <!-- Category Bar -->
+      <div class="lib-cat-bar" id="libCatBar"></div>
+      <!-- Upload Area -->
+      <div class="upload-area" id="uploadArea">
+        <div class="upload-icon">♫</div>
+        <h3>拖放光遇乐谱文件或文件夹到此处</h3>
+        <p>支持 JSON / TXT 文件，可拖入文件夹自动识别其中所有乐谱</p>
+        <div class="format-badge">.json</div>
+        <div class="format-badge">.txt</div>
+        <div class="format-badge">文件夹</div>
+      </div>
+      <input type="file" id="fileInput" accept=".json,.txt" multiple webkitdirectory style="display:none;">
+
+      <!-- Paste Area -->
+      <div class="paste-section">
+        <span class="paste-toggle" id="pasteToggle">▼ 或粘贴 JSON 文本</span>
+        <div class="paste-area" id="pasteArea">
+          <textarea id="pasteTextarea" placeholder="在此粘贴光遇乐谱 JSON 内容..."></textarea>
+          <button class="paste-load-btn" id="pasteLoadBtn">加载乐谱</button>
+        </div>
+      </div>
       <div class="cloud-toolbar">
         <button class="cloud-btn active" id="cloudTabLocal">本地曲库</button>
         <button class="cloud-btn" id="cloudTabCloud">云端乐谱</button>
@@ -2332,98 +2224,13 @@
         <div class="library-grid" id="libraryGrid"></div>
         <div class="library-empty" id="libraryEmpty" style="display: block;">
           <div class="empty-icon">♫</div>
-          <p>曲库为空，请先在播放器页面导入乐谱文件</p>
+          <p>曲库为空，请在上方拖放乐谱文件或粘贴 JSON 文本导入</p>
         </div>
       </div>
       <div id="cloudRemoteView" style="display: none;">
         <div class="cloud-section">
           <div class="cloud-hint">浏览社区分享的乐谱，点击下载到本地曲库</div>
           <div id="cloudSheetList"><div class="cloud-loading">云端暂无乐谱</div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== Practice Page (跟弹) ===== -->
-  <div class="page" id="page-practice">
-    <div class="practice-page">
-      <div class="practice-header">
-        <h2>跟弹练习</h2>
-        <p class="practice-desc">小球跟随曲谱在琴键间跳跃，按下正确琴键才能继续。</p>
-      </div>
-      <div class="practice-empty" id="practiceEmpty" style="">
-        <div class="empty-icon">♫</div>
-        <p>请先在曲库中选择一首乐谱</p>
-        <button class="ctrl-btn" onclick="switchPage('library')">前往曲库</button>
-      </div>
-      <div class="practice-content" id="practiceContent" style="display: none;">
-        <div class="practice-song-info">
-          <span id="practiceSongName">Golden Hour(Fermata ver.)</span>
-          <span id="practiceSongMeta">JVKE · 317 音符</span>
-        </div>
-        <div class="practice-controls-bar">
-          <button class="practice-btn" id="practiceStartBtn">停止</button>
-          <button class="practice-btn" id="practiceResetBtn">重置</button>
-          <div class="practice-speed-group" id="practiceSpeedBtns">
-            <button class="practice-btn" data-speed="0.5">0.5x</button>
-            <button class="practice-btn" data-speed="0.75">0.75x</button>
-            <button class="practice-btn active" data-speed="1">1.0x</button>
-            <button class="practice-btn" data-speed="1.5">1.5x</button>
-            <button class="practice-btn" data-speed="2">2.0x</button>
-          </div>
-          <span class="practice-divider"></span>
-          <button class="practice-btn" id="practiceLoopA">设A点</button>
-          <button class="practice-btn" id="practiceLoopB">设B点</button>
-          <button class="practice-btn" id="practiceLoopToggle">循环</button>
-          <span class="practice-divider"></span>
-          <button class="practice-btn" id="practiceOverlayBtn">跟弹悬浮窗</button>
-        </div>
-        <div class="practice-progress-bar">
-          <div class="practice-progress-fill" id="practiceProgressFill" style="width: 12.6482%;"></div>
-          <div class="loop-region" id="loopRegion"></div>
-          <div class="loop-marker marker-a" id="loopMarkerA" style="left:0%"></div>
-          <div class="loop-marker marker-b" id="loopMarkerB" style="left:100%"></div>
-        </div>
-        <div class="practice-stats-bar">
-          <span>进度: <span id="practiceProgress">32 / 253</span></span>
-          <span class="stat-correct">✓ <span id="practiceCorrect">33</span></span>
-          <span class="stat-wrong">✗ <span id="practiceWrong">3</span></span>
-        </div>
-        <div class="practice-viz-section">
-          <div class="viz-header">
-            <span class="viz-label">谱面跟踪</span>
-            <span class="viz-label" id="practiceVizPosition">0 / 0</span>
-          </div>
-          <div class="grid-scroll-wrap" id="practiceNoteGridWrap">
-            <div class="note-grid" id="practiceNoteGrid"></div>
-          </div>
-        </div>
-        <div class="practice-instrument-grid" id="practiceInstrumentGrid">
-          <div id="practiceBallsContainer"></div>
-          <div class="grid-row row-0">
-            <div class="note-btn hide-key-label jianpu-mode" id="pnote-0" data-index="0"><span class="note-name">C</span><span class="jianpu-num"><span class="jp-num">1</span></span><span class="diamond"></span><span class="key-label">Y</span><span class="key-num">0</span></div>
-            <div class="note-btn hide-key-label jianpu-mode" id="pnote-1" data-index="1"><span class="note-name">D</span><span class="jianpu-num"><span class="jp-num">2</span></span><span class="key-label">U</span><span class="key-num">1</span></div>
-            <div class="note-btn hide-key-label jianpu-mode" id="pnote-2" data-index="2"><span class="note-name">E</span><span class="jianpu-num"><span class="jp-num">3</span></span><span class="key-label">I</span><span class="key-num">2</span></div>
-            <div class="note-btn hide-key-label jianpu-mode" id="pnote-3" data-index="3"><span class="note-name">F</span><span class="jianpu-num"><span class="jp-num">4</span></span><span class="key-label">O</span><span class="key-num">3</span></div>
-            <div class="note-btn hide-key-label jianpu-mode" id="pnote-4" data-index="4"><span class="note-name">G</span><span class="jianpu-num"><span class="jp-num">5</span></span><span class="key-label">P</span><span class="key-num">4</span></div>
-          </div>
-          <div class="grid-row row-1">
-            <div class="note-btn hide-key-label jianpu-mode" id="pnote-5" data-index="5"><span class="note-name">A</span><span class="jianpu-num"><span class="jp-num">6</span></span><span class="diamond"></span><span class="key-label">H</span><span class="key-num">5</span></div>
-            <div class="note-btn hide-key-label jianpu-mode" id="pnote-6" data-index="6"><span class="note-name">B</span><span class="jianpu-num"><span class="jp-num">7</span></span><span class="key-label">J</span><span class="key-num">6</span></div>
-            <div class="note-btn hide-key-label jianpu-mode" id="pnote-7" data-index="7"><span class="note-name">C</span><span class="jianpu-num"><span class="jp-dots">·</span><span class="jp-num">1</span></span><span class="diamond"></span><span class="key-label">K</span><span class="key-num">7</span></div>
-            <div class="note-btn hide-key-label jianpu-mode" id="pnote-8" data-index="8"><span class="note-name">D</span><span class="jianpu-num"><span class="jp-dots">·</span><span class="jp-num">2</span></span><span class="key-label">L</span><span class="key-num">8</span></div>
-            <div class="note-btn hide-key-label practice-target jianpu-mode" id="pnote-9" data-index="9"><span class="note-name">E</span><span class="jianpu-num"><span class="jp-dots">·</span><span class="jp-num">3</span></span><span class="key-label">;</span><span class="key-num">9</span></div>
-          </div>
-          <div class="grid-row row-2">
-            <div class="note-btn hide-key-label jianpu-mode" id="pnote-10" data-index="10"><span class="note-name">F</span><span class="jianpu-num"><span class="jp-dots">·</span><span class="jp-num">4</span></span><span class="diamond"></span><span class="key-label">N</span><span class="key-num">10</span></div>
-            <div class="note-btn hide-key-label jianpu-mode" id="pnote-11" data-index="11"><span class="note-name">G</span><span class="jianpu-num"><span class="jp-dots">·</span><span class="jp-num">5</span></span><span class="key-label">M</span><span class="key-num">11</span></div>
-            <div class="note-btn hide-key-label jianpu-mode" id="pnote-12" data-index="12"><span class="note-name">A</span><span class="jianpu-num"><span class="jp-dots">·</span><span class="jp-num">6</span></span><span class="key-label">,</span><span class="key-num">12</span></div>
-            <div class="note-btn hide-key-label jianpu-mode" id="pnote-13" data-index="13"><span class="note-name">B</span><span class="jianpu-num"><span class="jp-dots">·</span><span class="jp-num">7</span></span><span class="key-label">.</span><span class="key-num">13</span></div>
-            <div class="note-btn hide-key-label jianpu-mode" id="pnote-14" data-index="14"><span class="note-name">C</span><span class="jianpu-num"><span class="jp-dots">··</span><span class="jp-num">1</span></span><span class="diamond"></span><span class="key-label">/</span><span class="key-num">14</span></div>
-          </div>
-        </div>
-        <div class="practice-tips">
-          <p>提示：小球落在哪个琴键上，就在光遇游戏中按对应键。按对小球跳到下一个音符，按错小球停下等你按对。</p>
         </div>
       </div>
     </div>
@@ -2480,8 +2287,10 @@
   <!-- ===== About Page ===== -->
   <div class="page" id="page-about">
     <div class="about-page">
-      <h2>关于光遇乐谱播放器</h2>
+      <h2>关于光遇乐谱播放器 v0.2</h2>
       <p>这是一个用于识别和播放《光·遇》(Sky: Children of the Light) 游戏乐谱的网页应用。支持 Sky Studio 导出的 JSON 格式和 ABC1/5 TXT 格式乐谱文件。</p>
+      <h2>关注抖音 3Q22976</h2>
+      <p>感谢你的支持，欢迎关注抖音账号 3Q22976，获取更多光遇乐谱和弹奏技巧。</p>
       <h2>功能特性</h2>
       <ul>
         <li>支持 JSON 和 TXT 两种乐谱格式，自动识别</li>
@@ -2495,31 +2304,6 @@
         <li>跟弹练习模式：小球引导练习，支持调速和片段循环</li>
         <li>乐谱解密：支持 Sky Studio 加密乐谱自动解密</li>
         <li>简谱转换：乐谱自动转为简谱数字 notation，支持 PNG 图片预览和下载</li>
-      </ul>
-      <h2>琴键对照</h2>
-      <ul>
-        <li>第一行（C 行）：C1 D1 E1 F1 G1 → 1Key0 ~ 1Key4</li>
-        <li>第二行（B 行）：A1 B1 C2 D2 E2 → 1Key5 ~ 1Key9</li>
-        <li>第三行（A 行）：F2 G2 A2 B2 C3 → 1Key10 ~ 1Key14</li>
-        <li>第二音域：2Key0 ~ 2Key14（高八度）</li>
-      </ul>
-      <h2>键盘映射</h2>
-      <ul>
-        <li>第一行：Q W E R T → 琴键 0~4（C D E F G）</li>
-        <li>第二行：A S D F G → 琴键 5~9（A B C D E）</li>
-        <li>第三行：Z X C V B → 琴键 10~14（F G A B C）</li>
-        <li>空格键：播放/暂停，ESC：停止</li>
-      </ul>
-      <h2>项目介绍</h2>
-      <p>光遇乐谱播放器是一个面向《光·遇》玩家的开源乐谱工具，旨在帮助玩家在游戏外轻松学习、练习和分享乐谱。本项目由光遇社区玩家自发开发，不隶属于任何商业组织。</p>
-      <p>项目特点：</p>
-      <ul>
-        <li>纯前端实现，无需安装，浏览器打开即用</li>
-        <li>支持 Sky Studio JSON 格式和 ABC1/5 TXT 格式乐谱导入</li>
-        <li>内置制谱器，可自创乐谱并导出分享</li>
-        <li>跟弹练习模式，帮助新手逐步掌握弹奏节奏</li>
-        <li>支持自定义键盘映射、界面主题和简谱数字标注</li>
-        <li>所有数据保存在本地浏览器，不上传任何信息到服务器</li>
       </ul>
       <h2>免责声明</h2>
       <p>1. 本项目为非营利性粉丝作品，与 Thatgamecompany（陈星汉工作室）及《光·遇》游戏官方无任何关联、合作或代言关系。</p>
@@ -2610,11 +2394,11 @@ const DEFAULT_NOTE_DURATION = 0.5;
 const LOOKAHEAD = 0.1;
 const SCHEDULE_INTERVAL = 25;
 const DEFAULT_KEY_MAP = {
-  'KeyQ': 0, 'KeyW': 1, 'KeyE': 2, 'KeyR': 3, 'KeyT': 4,
-  'KeyA': 5, 'KeyS': 6, 'KeyD': 7, 'KeyF': 8, 'KeyG': 9,
-  'KeyZ': 10, 'KeyX': 11, 'KeyC': 12, 'KeyV': 13, 'KeyB': 14,
+  'KeyY': 0, 'KeyU': 1, 'KeyI': 2, 'KeyO': 3, 'KeyP': 4,
+  'KeyH': 5, 'KeyJ': 6, 'KeyK': 7, 'KeyL': 8, 'Semicolon': 9,
+  'KeyN': 10, 'KeyM': 11, 'Comma': 12, 'Period': 13, 'Slash': 14,
 };
-const DEFAULT_KEY_LABELS = ['Q','W','E','R','T','A','S','D','F','G','Z','X','C','V','B'];
+const DEFAULT_KEY_LABELS = ['Y','U','I','O','P','H','J','K','L',';','N','M',',','.','/'];
 const KEY_STORAGE_KEY = 'skyMusicKeyMap';
 const THEME_STORAGE_KEY = 'skyMusicTheme';
 const KEYLABEL_STORAGE_KEY = 'skyMusicShowKeyLabels';
@@ -2758,73 +2542,97 @@ function saveKeyMap(keyMap) {
 const INSTRUMENTS = {
   celesta: {
     name: '钟琴',
+    // 钟琴：清脆金属感，基音+大量高频泛音，快速衰减
     harmonics: [
-      { ratio: 1, gain: 0.45, type: 'sine' },
-      { ratio: 2, gain: 0.20, type: 'sine' },
-      { ratio: 3, gain: 0.10, type: 'sine' },
-      { ratio: 4, gain: 0.05, type: 'sine' },
+      { ratio: 1, gain: 0.55, type: 'sine' },
+      { ratio: 2, gain: 0.30, type: 'sine' },
+      { ratio: 3, gain: 0.18, type: 'sine' },
+      { ratio: 4, gain: 0.12, type: 'sine' },
+      { ratio: 5, gain: 0.07, type: 'sine' },
+      { ratio: 6, gain: 0.04, type: 'sine' },
+      { ratio: 8, gain: 0.02, type: 'sine' },
     ],
-    attack: 0.005,
+    attack: 0.002,
     sustain: false,
-    filter: null,
+    decay: 0.9,
+    filter: { type: 'highpass', freq: 800, q: 0.4 },
+    transient: { gain: 0.12, decay: 0.02, freq: 6000 },
     vibrato: null,
   },
   piano: {
     name: '钢琴',
+    // 钢琴：基音强、泛音按 1/n² 递减，中低频丰富，带击弦瞬态
     harmonics: [
       { ratio: 1, gain: 0.50, type: 'triangle' },
-      { ratio: 2, gain: 0.25, type: 'sine' },
-      { ratio: 3, gain: 0.15, type: 'sine' },
-      { ratio: 4, gain: 0.08, type: 'sine' },
-      { ratio: 5, gain: 0.04, type: 'sine' },
-      { ratio: 6, gain: 0.02, type: 'sine' },
+      { ratio: 2, gain: 0.28, type: 'sine' },
+      { ratio: 3, gain: 0.20, type: 'sine' },
+      { ratio: 4, gain: 0.14, type: 'sine' },
+      { ratio: 5, gain: 0.10, type: 'sine' },
+      { ratio: 6, gain: 0.06, type: 'sine' },
+      { ratio: 7, gain: 0.04, type: 'sine' },
+      { ratio: 8, gain: 0.03, type: 'sine' },
     ],
-    attack: 0.003,
+    attack: 0.002,
     sustain: false,
-    filter: { type: 'lowpass', freq: 8000, q: 0.5 },
+    decay: 1.6,
+    filter: { type: 'lowpass', freq: 7000, q: 0.4 },
+    transient: { gain: 0.20, decay: 0.015, freq: 5000 },
     vibrato: null,
   },
   guitar: {
     name: '吉他',
+    // 吉他：尼龙/钢弦拨弦，谐波按 1/n² 衰减，带拨弦瞬态
     harmonics: [
-      { ratio: 1, gain: 0.40, type: 'sawtooth' },
-      { ratio: 2, gain: 0.20, type: 'sine' },
-      { ratio: 3, gain: 0.12, type: 'sine' },
-      { ratio: 4, gain: 0.06, type: 'sine' },
+      { ratio: 1, gain: 0.50, type: 'triangle' },
+      { ratio: 2, gain: 0.25, type: 'sine' },
+      { ratio: 3, gain: 0.16, type: 'sine' },
+      { ratio: 4, gain: 0.11, type: 'sine' },
+      { ratio: 5, gain: 0.07, type: 'sine' },
+      { ratio: 6, gain: 0.05, type: 'sine' },
+      { ratio: 7, gain: 0.03, type: 'sine' },
     ],
-    attack: 0.004,
+    attack: 0.002,
     sustain: false,
-    filter: { type: 'lowpass', freq: 4500, q: 1.0 },
+    decay: 1.4,
+    filter: { type: 'lowpass', freq: 5500, q: 0.5 },
+    transient: { gain: 0.18, decay: 0.012, freq: 4000 },
     vibrato: null,
   },
   pipa: {
     name: '琵琶',
+    // 琵琶：清脆短促、颗粒感强，明亮高频，快速衰减
     harmonics: [
-      { ratio: 1, gain: 0.35, type: 'square' },
-      { ratio: 2, gain: 0.18, type: 'sine' },
-      { ratio: 3, gain: 0.12, type: 'sine' },
-      { ratio: 4, gain: 0.08, type: 'sine' },
-      { ratio: 5, gain: 0.05, type: 'sine' },
-      { ratio: 6, gain: 0.03, type: 'sine' },
+      { ratio: 1, gain: 0.45, type: 'triangle' },
+      { ratio: 2, gain: 0.30, type: 'sine' },
+      { ratio: 3, gain: 0.22, type: 'sine' },
+      { ratio: 4, gain: 0.16, type: 'sine' },
+      { ratio: 5, gain: 0.11, type: 'sine' },
+      { ratio: 6, gain: 0.08, type: 'sine' },
+      { ratio: 7, gain: 0.05, type: 'sine' },
+      { ratio: 9, gain: 0.03, type: 'sine' },
     ],
     attack: 0.001,
     sustain: false,
-    filter: { type: 'lowpass', freq: 10000, q: 0.3 },
+    decay: 0.7,
+    filter: { type: 'bandpass', freq: 4000, q: 0.6 },
+    transient: { gain: 0.25, decay: 0.01, freq: 7000 },
     vibrato: null,
   },
   violin: {
     name: '小提琴',
+    // 小提琴：弓弦持续，1 个锯齿基音 + 正弦泛音，低通收紧避免刺耳，带慢速颤音
     harmonics: [
-      { ratio: 1, gain: 0.35, type: 'sawtooth' },
-      { ratio: 2, gain: 0.20, type: 'sine' },
-      { ratio: 3, gain: 0.12, type: 'sine' },
-      { ratio: 4, gain: 0.08, type: 'sine' },
-      { ratio: 5, gain: 0.04, type: 'sine' },
+      { ratio: 1, gain: 0.40, type: 'sawtooth' },
+      { ratio: 2, gain: 0.22, type: 'sine' },
+      { ratio: 3, gain: 0.18, type: 'sine' },
+      { ratio: 4, gain: 0.13, type: 'sine' },
+      { ratio: 5, gain: 0.10, type: 'sine' },
+      { ratio: 6, gain: 0.07, type: 'sine' },
     ],
-    attack: 0.03,
+    attack: 0.04,
     sustain: true,
-    filter: { type: 'lowpass', freq: 6000, q: 0.8 },
-    vibrato: { freq: 5, depth: 4 },
+    filter: { type: 'lowpass', freq: 6000, q: 0.4 },
+    vibrato: { freq: 5.5, depth: 5 },
   },
 };
 
@@ -2857,15 +2665,6 @@ const state = {
   keyMap: loadKeyMap(),
   keyLabels: deriveKeyLabels(loadKeyMap()),
   rebindingKey: null,
-  practice: {
-    active: false,
-    keysBound: false,
-    noteGroups: [],
-    groupIndex: 0,
-    pressedInGroup: new Set(),
-    loop: { enabled: false, startIdx: 0, endIdx: -1 },
-    stats: { correct: 0, wrong: 0 },
-  },
 };
 
 // ====================== Audio Engine ======================
@@ -2874,9 +2673,18 @@ function initAudio() {
   const AC = window.AudioContext || window.webkitAudioContext;
   state.audioContext = new AC();
 
+  // Master compressor/limiter to prevent clipping when notes overlap
+  state.compressor = state.audioContext.createDynamicsCompressor();
+  state.compressor.threshold.value = -8;
+  state.compressor.knee.value = 15;
+  state.compressor.ratio.value = 10;
+  state.compressor.attack.value = 0.002;
+  state.compressor.release.value = 0.2;
+
   state.masterGain = state.audioContext.createGain();
-  state.masterGain.gain.value = 0.6;
-  state.masterGain.connect(state.audioContext.destination);
+  state.masterGain.gain.value = 0.55;
+  state.masterGain.connect(state.compressor);
+  state.compressor.connect(state.audioContext.destination);
 
   const convolver = state.audioContext.createConvolver();
   const sr = state.audioContext.sampleRate;
@@ -2892,9 +2700,9 @@ function initAudio() {
   state.reverbNode = convolver;
 
   state.reverbGain = state.audioContext.createGain();
-  state.reverbGain.gain.value = 0.25;
+  state.reverbGain.gain.value = 0.2;
   state.reverbNode.connect(state.reverbGain);
-  state.reverbGain.connect(state.audioContext.destination);
+  state.reverbGain.connect(state.compressor);
 }
 
 function keyToFreq(key, pitchLevel) {
@@ -2942,19 +2750,33 @@ function playNote(key, pitchLevel, when, duration) {
   const inst = INSTRUMENTS[state.currentInstrument] || INSTRUMENTS.celesta;
   const ctx = state.audioContext;
 
+  // Effective note duration (longer for instruments with a tail decay)
+  const total = inst.sustain ? Math.max(duration, 0.6) : (inst.decay || duration);
+
+  // Normalize harmonic gains so the sum stays near 0.75 → avoids clipping on chords
+  const harmSum = inst.harmonics.reduce((s, h) => s + h.gain, 0) || 1;
+  const norm = 0.75 / harmSum;
+
   // Output gain with ADSR envelope
   const noteGain = ctx.createGain();
   noteGain.gain.setValueAtTime(0, when);
-  noteGain.gain.linearRampToValueAtTime(1, when + inst.attack);
+  noteGain.gain.linearRampToValueAtTime(norm, when + inst.attack);
 
   if (inst.sustain) {
     // Sustained instruments (violin): hold then release
-    noteGain.gain.setValueAtTime(1, when + inst.attack);
-    noteGain.gain.setValueAtTime(1, when + duration * 0.7);
-    noteGain.gain.exponentialRampToValueAtTime(0.001, when + duration);
+    const endTime = when + total;
+    const holdEnd = Math.min(when + duration * 0.7, endTime - 0.02);
+    if (holdEnd > when + inst.attack) {
+      noteGain.gain.setValueAtTime(norm, when + inst.attack);
+      noteGain.gain.setValueAtTime(norm, holdEnd);
+      noteGain.gain.exponentialRampToValueAtTime(0.001, endTime);
+    } else {
+      noteGain.gain.setValueAtTime(norm, when + inst.attack);
+      noteGain.gain.exponentialRampToValueAtTime(0.001, endTime);
+    }
   } else {
-    // Plucked/struck instruments: exponential decay
-    noteGain.gain.exponentialRampToValueAtTime(0.001, when + duration);
+    // Plucked/struck instruments: exponential decay (independent of note length)
+    noteGain.gain.exponentialRampToValueAtTime(0.001, when + total);
   }
 
   // Optional filter
@@ -2970,6 +2792,30 @@ function playNote(key, pitchLevel, when, duration) {
   lastNode.connect(state.masterGain);
   lastNode.connect(state.reverbNode);
 
+  // Optional transient (strike/pluck noise burst for percussive realism)
+  const oscs = [];
+  if (inst.transient) {
+    const noiseDur = inst.transient.decay;
+    const noiseBuf = ctx.createBuffer(1, Math.max(1, Math.floor(ctx.sampleRate * noiseDur)), ctx.sampleRate);
+    const nd = noiseBuf.getChannelData(0);
+    for (let i = 0; i < nd.length; i++) {
+      nd[i] = (Math.random() * 2 - 1) * (1 - i / nd.length);
+    }
+    const noise = ctx.createBufferSource();
+    noise.buffer = noiseBuf;
+    const bp = ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.value = inst.transient.freq;
+    bp.Q.value = 0.8;
+    const ng = ctx.createGain();
+    ng.gain.value = inst.transient.gain * norm * 0.5;
+    noise.connect(bp);
+    bp.connect(ng);
+    ng.connect(lastNode);
+    noise.start(when);
+    oscs.push(noise);
+  }
+
   // Optional vibrato (LFO → frequency modulation)
   let vibratoGain = null;
   let vibratoOsc = null;
@@ -2980,10 +2826,9 @@ function playNote(key, pitchLevel, when, duration) {
     vibratoGain.gain.value = freq * inst.vibrato.depth / 100;
     vibratoOsc.connect(vibratoGain);
     vibratoOsc.start(when);
-    vibratoOsc.stop(when + duration + 0.1);
+    vibratoOsc.stop(when + total + 0.1);
   }
 
-  const oscs = [];
   inst.harmonics.forEach(h => {
     const osc = ctx.createOscillator();
     osc.type = h.type || 'sine';
@@ -2998,13 +2843,13 @@ function playNote(key, pitchLevel, when, duration) {
     osc.connect(g);
     g.connect(noteGain);
     osc.start(when);
-    osc.stop(when + duration + 0.1);
+    osc.stop(when + total + 0.1);
     oscs.push(osc);
   });
 
   if (vibratoOsc) oscs.push(vibratoOsc);
 
-  state.scheduledOscillators.push({ oscs, stopTime: when + duration + 0.1 });
+  state.scheduledOscillators.push({ oscs, stopTime: when + total + 0.1 });
 }
 
 // ====================== File Parsing ======================
@@ -3143,66 +2988,184 @@ function validateSong(song) {
   return true;
 }
 
-function handleFile(file) {
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    let text = e.target.result;
-    text = text.replace(/^\uFEFF/, '');
-    const trimmed = text.trim();
-    const ext = (file.name || '').split('.').pop().toLowerCase();
-    let songs = null;
-    let lastError = null;
+// 处理拖入的文件（支持单个/多个文件及文件夹）
+function handleDrop(dataTransfer) {
+  const items = dataTransfer && dataTransfer.items;
+  const filePaths = [];
+  const collectFiles = (item) => {
+    const entry = item.webkitGetAsEntry ? item.webkitGetAsEntry() : null;
+    if (!entry) return;
+    if (entry.isFile) {
+      entry.file((f) => filePaths.push(f), () => {});
+    } else if (entry.isDirectory) {
+      const reader = entry.createReader();
+      const readEntries = () => {
+        reader.readEntries((entries) => {
+          if (entries.length === 0) return;
+          entries.forEach((e) => {
+            if (e.isFile) {
+              e.file((f) => filePaths.push(f), () => {});
+            } else if (e.isDirectory) {
+              const subReader = e.createReader();
+              const subRead = () => {
+                subReader.readEntries((sub) => {
+                  if (sub.length === 0) return;
+                  sub.forEach((se) => {
+                    if (se.isFile) se.file((f) => filePaths.push(f), () => {});
+                    else if (se.isDirectory) walkDir(se);
+                  });
+                  subRead();
+                }, () => {});
+              };
+              subRead();
+            }
+          });
+          readEntries();
+        }, () => {});
+      };
+      readEntries();
+    }
+  };
+  // 通用递归目录遍历（处理嵌套）
+  const walkDir = (dirEntry) => {
+    const reader = dirEntry.createReader();
+    const readBatch = () => {
+      reader.readEntries((entries) => {
+        if (entries.length === 0) return;
+        entries.forEach((e) => {
+          if (e.isFile) e.file((f) => filePaths.push(f), () => {});
+          else if (e.isDirectory) walkDir(e);
+        });
+        readBatch();
+      }, () => {});
+    };
+    readBatch();
+  };
 
-    if (trimmed.charAt(0) === '[' || trimmed.charAt(0) === '{' || ext === 'json') {
+  if (items && items.length > 0) {
+    // 用 entry API 收集所有文件（含文件夹内）
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.kind === 'file') collectFiles(item);
+    }
+    // 异步收集完成后统一处理
+    setTimeout(() => {
+      if (filePaths.length > 0) handleFiles(filePaths);
+    }, 300);
+  } else if (dataTransfer && dataTransfer.files && dataTransfer.files.length > 0) {
+    handleFiles(Array.from(dataTransfer.files));
+  }
+}
+
+// 批量处理多个文件（含从文件夹收集到的文件）
+function handleFiles(files) {
+  const supported = files.filter(f => {
+    const ext = (f.name || '').split('.').pop().toLowerCase();
+    return ext === 'json' || ext === 'txt';
+  });
+  if (supported.length === 0) {
+    showError('未找到可解析的乐谱文件（支持 .json / .txt）。');
+    return;
+  }
+  let done = 0;
+  const allSongs = [];
+  const failed = [];
+  const loadedCount = supported.length;
+
+  supported.forEach((file) => {
+    const reader = new FileReader();
+    reader.onload = function(e) {
       try {
-        songs = parseJSONFile(text);
-      } catch (err) {
-        lastError = err;
-        if (ext === 'txt') {
-          try { songs = parseTXTFile(text); } catch (e) { lastError = e; }
+        const parsed = parseSongFile(file, e.target.result);
+        if (parsed && parsed.length > 0) {
+          allSongs.push.apply(allSongs, parsed);
+        } else {
+          failed.push(file.name);
         }
-      }
-    } else if (ext === 'txt' || trimmed.match(/^\d+\s+\d+\s+\d+/) || /[ABCabc]\d/.test(trimmed)) {
-      try {
-        songs = parseTXTFile(text);
       } catch (err) {
-        lastError = err;
-        try { songs = parseJSONFile(text); } catch (e) { lastError = e; }
+        failed.push(file.name);
+      } finally {
+        done++;
+        if (done >= loadedCount) finishHandleFiles(allSongs, failed, loadedCount);
       }
-    } else {
-      try {
-        songs = parseJSONFile(text);
-      } catch (err) {
-        lastError = err;
+    };
+    reader.onerror = function() {
+      failed.push(file.name);
+      done++;
+      if (done >= loadedCount) finishHandleFiles(allSongs, failed, loadedCount);
+    };
+    reader.readAsText(file, 'UTF-8');
+  });
+}
+
+function finishHandleFiles(allSongs, failed, loadedCount) {
+  const validSongs = allSongs.filter(validateSong);
+  if (validSongs.length === 0) {
+    const msg = failed.length === loadedCount
+      ? '所有文件解析失败，请确保文件是光遇乐谱 JSON 或 TXT 格式。'
+      : '解析成功但未找到有效的光遇乐谱数据。JSON 需包含 songNotes 字段；TXT 需包含 A1-A5/B1-B5/C1-C5 格式的音符。';
+    showError(msg);
+    return;
+  }
+  const sourceNote = loadedCount + ' 个文件' + (failed.length > 0 ? '（' + failed.length + ' 个失败）' : '');
+  loadSongs(validSongs, sourceNote);
+}
+
+// 解析单个文件的文本内容，返回歌曲数组
+function parseSongFile(file, text) {
+  text = String(text).replace(/^\uFEFF/, '');
+  const trimmed = text.trim();
+  const ext = (file.name || '').split('.').pop().toLowerCase();
+  let songs = null;
+  let lastError = null;
+
+  if (trimmed.charAt(0) === '[' || trimmed.charAt(0) === '{' || ext === 'json') {
+    try {
+      songs = parseJSONFile(text);
+    } catch (err) {
+      lastError = err;
+      if (ext === 'txt') {
         try { songs = parseTXTFile(text); } catch (e) { lastError = e; }
       }
     }
+  } else if (ext === 'txt' || trimmed.match(/^\d+\s+\d+\s+\d+/) || /[ABCabc]\d/.test(trimmed)) {
+    try {
+      songs = parseTXTFile(text);
+    } catch (err) {
+      lastError = err;
+      try { songs = parseJSONFile(text); } catch (e) { lastError = e; }
+    }
+  } else {
+    try {
+      songs = parseJSONFile(text);
+    } catch (err) {
+      lastError = err;
+      try { songs = parseTXTFile(text); } catch (e) { lastError = e; }
+    }
+  }
 
-    if (!songs || songs.length === 0) {
-      showError('文件解析失败：' + (lastError ? lastError.message : '未知错误') + '。请确保文件是光遇乐谱 JSON 或 TXT 格式。');
-      return;
-    }
-    const validSongs = songs.filter(validateSong);
-    if (validSongs.length === 0) {
-      showError('文件解析成功，但未找到有效的光遇乐谱数据。JSON 格式需包含 songNotes 字段；TXT 格式需包含 A1-A5/B1-B5/C1-C5 格式的音符。');
-      return;
-    }
-    loadSongs(validSongs, file.name);
-  };
-  reader.onerror = function() {
-    showError('文件读取失败，请重试');
-  };
-  reader.readAsText(file, 'UTF-8');
+  if (!songs || songs.length === 0) {
+    throw new Error(lastError ? lastError.message : '未知错误');
+  }
+  return songs;
+}
+
+// 保留单个文件处理接口（供其它入口调用）
+function handleFile(file) {
+  handleFiles([file]);
 }
 
 function loadSongs(songs, fileName) {
   state.songs = songs;
   state.currentSongIndex = 0;
   hideError();
-  showInfo('成功加载 ' + songs.length + ' 首乐谱' + (fileName ? '（来源：' + fileName + '）' : ''));
-  setTimeout(() => hideInfo(), 3000);
 
-  songs.forEach(song => saveSongToLibrary(song));
+  let savedCount = 0;
+  songs.forEach(song => { if (saveSongToLibrary(song)) savedCount++; });
+  renderLibrary();
+
+  showInfo('成功加载 ' + songs.length + ' 首乐谱' + (fileName ? '（来源：' + fileName + '）' : '') + '，已保存 ' + savedCount + ' 首到曲库');
+  setTimeout(() => hideInfo(), 4000);
 
   document.getElementById('player').classList.add('active');
 
@@ -3223,7 +3186,6 @@ function switchPage(pageName) {
     n.classList.toggle('active', n.dataset.page === pageName);
   });
   if (pageName === 'library') renderLibrary();
-  if (pageName === 'practice') initPracticePage();
   if (pageName === 'composer') composerInit();
   if (pageName === 'settings') initSettingsPage();
   if (pageName === 'player') {
@@ -3779,6 +3741,156 @@ function saveLibraryToStorage(library) {
   }
 }
 
+// ====================== Category Management ======================
+const CATEGORY_KEY = 'skyMusicCategories';
+const CATEGORY_SELECT_KEY = 'skyMusicCategorySelect';
+
+function loadCategoriesFromStorage() {
+  try {
+    const raw = localStorage.getItem(CATEGORY_KEY);
+    const arr = raw ? JSON.parse(raw) : [];
+    return Array.isArray(arr) ? arr : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveCategoriesToStorage(categories) {
+  try {
+    localStorage.setItem(CATEGORY_KEY, JSON.stringify(categories));
+  } catch (e) {
+    console.error('Failed to save categories:', e);
+  }
+}
+
+function getSelectedCategory() {
+  const raw = localStorage.getItem(CATEGORY_SELECT_KEY);
+  return raw || 'all';
+}
+
+function setSelectedCategory(cat) {
+  localStorage.setItem(CATEGORY_SELECT_KEY, cat);
+}
+
+// 创建/重命名分类
+function renameCategory(oldName, newName) {
+  newName = (newName || '').trim();
+  if (!newName) return false;
+  const categories = loadCategoriesFromStorage();
+  if (categories.indexOf(newName) >= 0 && newName !== oldName) return false;
+  const idx = categories.indexOf(oldName);
+  if (idx < 0) return false;
+  categories[idx] = newName;
+  saveCategoriesToStorage(categories);
+  // 更新曲库中该分类下的歌曲
+  const library = loadLibraryFromStorage();
+  library.forEach(s => { if (s.category === oldName) s.category = newName; });
+  saveLibraryToStorage(library);
+  if (getSelectedCategory() === oldName) setSelectedCategory(newName);
+  renderLibrary();
+  return true;
+}
+
+// 新增分类
+function addCategory(name) {
+  name = (name || '').trim();
+  if (!name) return false;
+  const categories = loadCategoriesFromStorage();
+  if (categories.indexOf(name) >= 0) return false;
+  categories.push(name);
+  saveCategoriesToStorage(categories);
+  setSelectedCategory(name);
+  renderLibrary();
+  return true;
+}
+
+// 删除分类（可保留歌曲，歌曲归为未分类）
+function deleteCategory(name) {
+  const categories = loadCategoriesFromStorage();
+  const idx = categories.indexOf(name);
+  if (idx < 0) return false;
+  if (!confirm('确定删除分类「' + name + '」吗？该分类下的乐谱将变为未分类。')) return false;
+  categories.splice(idx, 1);
+  saveCategoriesToStorage(categories);
+  const library = loadLibraryFromStorage();
+  library.forEach(s => { if (s.category === name) s.category = ''; });
+  saveLibraryToStorage(library);
+  if (getSelectedCategory() === name) setSelectedCategory('all');
+  renderLibrary();
+  return true;
+}
+
+function promptAddCategory() {
+  const name = prompt('输入新分类名称：');
+  if (name === null) return;
+  if (!addCategory(name)) {
+    alert('分类名称无效或已存在，请更换名称。');
+  }
+}
+
+function promptRenameCategory(cat) {
+  const name = prompt('重命名分类「' + cat + '」为：', cat);
+  if (name === null) return;
+  if (!renameCategory(cat, name)) {
+    alert('分类名称无效或已存在，请更换名称。');
+  }
+}
+
+// 将指定歌曲归入某个分类
+function assignSongToCategory(song, category) {
+  const library = loadLibraryFromStorage();
+  const idx = library.findIndex(s =>
+    (s.name||'')+'|'+(s.author||'')+'|'+s.songNotes.length ===
+    (song.name||'')+'|'+(song.author||'')+'|'+song.songNotes.length
+  );
+  if (idx < 0) return;
+  library[idx].category = category || '';
+  saveLibraryToStorage(library);
+  renderLibrary();
+}
+
+// 弹出分类选择器，将歌曲归入某个分类
+function promptAssignCategory(song) {
+  const categories = loadCategoriesFromStorage();
+  const current = song.category || '';
+  let opts = '';
+  opts += '0) 未分类（移出分类）\n';
+  categories.forEach((cat, i) => {
+    opts += (i + 1) + ') ' + cat + (cat === current ? '（当前）' : '') + '\n';
+  });
+  const input = prompt(
+    '为「' + (song.name || '未知曲目') + '」选择分类：\n\n' + opts +
+    '\n输入分类序号，或直接输入新的分类名称：',
+    current
+  );
+  if (input === null) return;
+
+  const trimmed = input.trim();
+  if (trimmed === '') return;
+  // 若输入的是序号
+  if (/^\d+$/.test(trimmed)) {
+    const num = parseInt(trimmed, 10);
+    if (num === 0) {
+      assignSongToCategory(song, '');
+      return;
+    }
+    if (num >= 1 && num <= categories.length) {
+      assignSongToCategory(song, categories[num - 1]);
+      return;
+    }
+    alert('分类序号无效。');
+    return;
+  }
+  // 输入的是新名称：若已存在则直接归入，否则新建
+  if (categories.indexOf(trimmed) < 0) {
+    if (!addCategory(trimmed)) {
+      alert('分类名称无效或已存在。');
+      return;
+    }
+  }
+  assignSongToCategory(song, trimmed);
+}
+
 // ====================== Cloud API ======================
 const API_BASE = (function() {
   var s = document.location.origin;
@@ -3865,12 +3977,18 @@ async function renderCloudSheets(search) {
 }
 
 function saveSongToLibrary(song) {
-  if (!song || !validateSong(song)) return;
+  if (!song || !validateSong(song)) return false;
   const library = loadLibraryFromStorage();
   const sig = (song.name || '') + '|' + (song.author || '') + '|' + song.songNotes.length;
-  if (library.some(s => (s.name||'')+'|'+(s.author||'')+'|'+s.songNotes.length === sig)) return;
+  if (library.some(s => (s.name||'')+'|'+(s.author||'')+'|'+s.songNotes.length === sig)) return false;
+  // 若当前选中了某个具体分类，新歌默认归入该分类
+  if (!song.category) {
+    const sel = getSelectedCategory();
+    if (sel && sel !== 'all' && sel !== '__none__') song.category = sel;
+  }
   library.push(song);
   saveLibraryToStorage(library);
+  return true;
 }
 
 function deleteSongFromLibrary(index) {
@@ -3891,6 +4009,20 @@ function renderLibrary() {
   const searchTerm = (document.getElementById('libSearch').value || '').toLowerCase().trim();
 
   let library = loadLibraryFromStorage();
+  const categories = loadCategoriesFromStorage();
+  const selectedCat = getSelectedCategory();
+
+  // 渲染分类栏
+  renderCategoryBar(library, categories, selectedCat);
+
+  // 按分类过滤（selectedCat !== 'all' 且歌曲 category 匹配）
+  if (selectedCat !== 'all') {
+    if (selectedCat === '__none__') {
+      library = library.filter(s => !(s.category || ''));
+    } else {
+      library = library.filter(s => (s.category || '') === selectedCat);
+    }
+  }
 
   if (searchTerm) {
     library = library.filter(s =>
@@ -3902,9 +4034,13 @@ function renderLibrary() {
   if (library.length === 0) {
     grid.innerHTML = '';
     empty.style.display = 'block';
-    empty.querySelector('p').textContent = searchTerm
-      ? '未找到匹配 "' + searchTerm + '" 的乐谱'
-      : '曲库为空，请先在播放器页面导入乐谱文件';
+    let emptyMsg = '曲库为空，请在上方拖放乐谱文件或粘贴 JSON 文本导入';
+    if (searchTerm) {
+      emptyMsg = '未找到匹配 "' + searchTerm + '" 的乐谱';
+    } else if (selectedCat !== 'all') {
+      emptyMsg = '该分类下暂无乐谱';
+    }
+    empty.querySelector('p').textContent = emptyMsg;
     return;
   }
 
@@ -3918,14 +4054,17 @@ function renderLibrary() {
     const noteCount = song.songNotes ? song.songNotes.length : 0;
     const bpm = song.bpm || '—';
     const pitchLevel = (song.pitchLevel || 0);
+    const songCat = song.category || '';
 
     card.innerHTML =
       '<div class="card-icon">&#9835;</div>' +
       '<button class="card-share" title="分享到云端">⬆</button>' +
       '<button class="card-delete" title="删除" data-lib-idx="' + displayIndex + '">&#10005;</button>' +
+      '<button class="card-cat" title="归入分类">&#9776;</button>' +
       '<div class="card-name">' + escapeHtml(song.name || '未知曲目') + '</div>' +
       '<div class="card-author">' + escapeHtml(song.author || '未知作者') + '</div>' +
       '<div class="card-meta">' +
+        (songCat ? '<span class="card-tag cat-name">📁 ' + escapeHtml(songCat) + '</span>' : '') +
         '<span class="card-tag">BPM ' + bpm + '</span>' +
         (pitchLevel ? '<span class="card-tag">调 #' + pitchLevel + '</span>' : '') +
         '<span class="card-tag">' + noteCount + ' 音符</span>' +
@@ -3934,8 +4073,15 @@ function renderLibrary() {
     card.addEventListener('click', (e) => {
       if (e.target.closest('.card-delete')) return;
       if (e.target.closest('.card-share')) return;
+      if (e.target.closest('.card-cat')) return;
       loadSongs([song], null);
       switchPage('player');
+    });
+
+    const catBtn = card.querySelector('.card-cat');
+    catBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      promptAssignCategory(song);
     });
 
     var shareBtn = card.querySelector('.card-share');
@@ -3972,6 +4118,76 @@ function renderLibrary() {
 
     grid.appendChild(card);
   });
+}
+
+function renderCategoryBar(library, categories, selectedCat) {
+  const bar = document.getElementById('libCatBar');
+  if (!bar) return;
+  bar.innerHTML = '';
+
+  // 计数：未分类 + 每个分类
+  const countMap = {};
+  library.forEach(s => {
+    const c = s.category || '';
+    countMap[c] = (countMap[c] || 0) + 1;
+  });
+
+  const allCount = library.length;
+
+  function makeChip(label, value, count, ops) {
+    const chip = document.createElement('div');
+    chip.className = 'lib-cat-chip' + (selectedCat === value ? ' active' : '');
+    chip.textContent = label;
+    if (count !== undefined) {
+      const span = document.createElement('span');
+      span.className = 'cat-count';
+      span.textContent = count;
+      chip.appendChild(span);
+    }
+    if (ops) {
+      const opsWrap = document.createElement('span');
+      opsWrap.className = 'lib-cat-ops';
+      opsWrap.appendChild(ops);
+      chip.appendChild(opsWrap);
+    }
+    chip.addEventListener('click', (e) => {
+      if (e.target.closest('.lib-cat-ops')) return;
+      setSelectedCategory(value);
+      renderLibrary();
+    });
+    bar.appendChild(chip);
+  }
+
+  // “所有”分类
+  makeChip('全部', 'all', allCount, null);
+
+  // 未分类
+  const unCategorized = countMap[''] || 0;
+  makeChip('未分类', '__none__', unCategorized, null);
+
+  // 自定义分类
+  categories.forEach(cat => {
+    const opsWrap = document.createElement('div');
+    const renameBtn = document.createElement('button');
+    renameBtn.textContent = '✎';
+    renameBtn.title = '重命名';
+    renameBtn.addEventListener('click', (e) => { e.stopPropagation(); promptRenameCategory(cat); });
+    const delBtn = document.createElement('button');
+    delBtn.textContent = '×';
+    delBtn.title = '删除分类';
+    delBtn.addEventListener('click', (e) => { e.stopPropagation(); deleteCategory(cat); });
+    opsWrap.appendChild(renameBtn);
+    opsWrap.appendChild(delBtn);
+    makeChip(cat, cat, countMap[cat] || 0, opsWrap);
+  });
+
+  // 新建分类按钮
+  const addBtn = document.createElement('button');
+  addBtn.className = 'lib-cat-add';
+  addBtn.textContent = '+ 新建分类';
+  addBtn.title = '自定义分类名称';
+  addBtn.addEventListener('click', () => promptAddCategory());
+  bar.appendChild(addBtn);
 }
 
 function escapeHtml(str) {
@@ -4510,14 +4726,11 @@ function rebindKey(e) {
 
 function refreshKeyLabels() {
   for (let i = 0; i < 15; i++) {
-    const playerBtn = document.getElementById('note-' + i);
-    const practiceBtn = document.getElementById('pnote-' + i);
+    const btn = document.getElementById('note-' + i);
     const label = state.keyLabels[i] || '';
-    [playerBtn, practiceBtn].forEach(btn => {
-      if (!btn) return;
-      const span = btn.querySelector('.key-label');
-      if (span) span.textContent = label;
-    });
+    if (!btn) return;
+    const span = btn.querySelector('.key-label');
+    if (span) span.textContent = label;
   }
 }
 
@@ -4561,312 +4774,6 @@ function resetKeyMap() {
   refreshKeyLabels();
 }
 
-// ====================== Practice Mode (跟弹) ======================
-function initPracticePage() {
-  const song = getCurrentSong();
-  const empty = document.getElementById('practiceEmpty');
-  const content = document.getElementById('practiceContent');
-  if (!song || !song.songNotes || song.songNotes.length === 0) {
-    empty.style.display = '';
-    content.style.display = 'none';
-    if (state.practice.active) stopPractice();
-    return;
-  }
-  empty.style.display = 'none';
-  content.style.display = '';
-  document.getElementById('practiceSongName').textContent = song.name || '未知曲目';
-  document.getElementById('practiceSongMeta').textContent =
-    (song.author || '未知') + ' · ' + song.songNotes.length + ' 音符';
-  buildPracticeNoteGrid(song);
-  if (state.practice.active) {
-    repositionPracticeBall();
-    updatePracticeNoteGrid(state.practice.groupIndex);
-  }
-  bindPracticeKeys();
-}
-
-function bindPracticeKeys() {
-  if (state.practice.keysBound) return;
-  for (let i = 0; i < 15; i++) {
-    const btn = document.getElementById('pnote-' + i);
-    if (btn) {
-      const idx = i;
-      btn.insertAdjacentHTML('beforeend', '<span class="key-label">' + state.keyLabels[i] + '</span>');
-      if (!state.showKeyLabels) btn.classList.add('hide-key-label');
-      btn.addEventListener('click', () => handlePracticeKeyClick(idx));
-    }
-  }
-  state.practice.keysBound = true;
-}
-
-function buildPracticeGroups(song) {
-  if (!song || !song.songNotes) return [];
-  const map = {};
-  song.songNotes.forEach(n => {
-    if (!map[n.time]) map[n.time] = [];
-    const idx = keyToGridIndex(n.key);
-    if (idx >= 0 && idx <= 14) {
-      map[n.time].push({ key: n.key, idx: idx, register: n.key.startsWith('2') ? 2 : 1 });
-    }
-  });
-  return Object.keys(map).map(Number).sort((a, b) => a - b).map(t => map[t]);
-}
-
-function startPractice() {
-  const song = getCurrentSong();
-  if (!song || !song.songNotes || song.songNotes.length === 0) {
-    showError('请先加载乐谱');
-    return;
-  }
-  if (state.isPlaying) stopPlayback();
-
-  const p = state.practice;
-  p.noteGroups = buildPracticeGroups(song);
-  if (p.noteGroups.length === 0) {
-    showError('乐谱中没有有效的音符');
-    return;
-  }
-  p.groupIndex = 0;
-  p.pressedInGroup = new Set();
-  p.stats = { correct: 0, wrong: 0 };
-  p.active = true;
-
-  document.getElementById('practiceStartBtn').textContent = '停止';
-  document.getElementById('practiceStartBtn').classList.remove('active');
-
-  showPracticeBall();
-  moveBallToGroup(0);
-  updatePracticeStats();
-}
-
-function stopPractice() {
-  const p = state.practice;
-  p.active = false;
-  hidePracticeBall();
-  clearPracticeTargets();
-  document.getElementById('practiceStartBtn').textContent = '开始';
-  document.getElementById('practiceStartBtn').classList.add('active');
-  updatePracticeNoteGrid(-1);
-}
-
-function resetPractice() {
-  const p = state.practice;
-  p.groupIndex = 0;
-  p.pressedInGroup = new Set();
-  p.stats = { correct: 0, wrong: 0 };
-  p.loop.enabled = false;
-  p.loop.startIdx = 0;
-  p.loop.endIdx = -1;
-  updateLoopUI();
-  updatePracticeStats();
-  if (p.active) {
-    moveBallToGroup(0);
-  } else {
-    updatePracticeNoteGrid(-1);
-  }
-}
-
-function showPracticeBall() {
-  const container = document.getElementById('practiceBallsContainer');
-  if (container) container.querySelectorAll('.practice-ball').forEach(b => b.classList.add('visible'));
-}
-
-function hidePracticeBall() {
-  const container = document.getElementById('practiceBallsContainer');
-  if (container) container.innerHTML = '';
-}
-
-function updateBallSpeed() {
-  const container = document.getElementById('practiceBallsContainer');
-  if (!container) return;
-  const dur = 0.4 / state.playbackSpeed;
-  container.querySelectorAll('.practice-ball').forEach(ball => {
-    ball.style.transitionDuration = dur + 's, ' + dur + 's';
-  });
-}
-
-function moveBallToGroup(idx) {
-  const p = state.practice;
-  const group = p.noteGroups[idx];
-  if (!group || group.length === 0) return;
-  clearPracticeTargets();
-  group.forEach(note => {
-    const btn = document.getElementById('pnote-' + note.idx);
-    if (btn) btn.classList.add('practice-target');
-  });
-  p.pressedInGroup = new Set();
-  spawnBalls(group);
-  updatePracticeNoteGrid(idx);
-  updatePracticeStats();
-  updateProgressFill();
-}
-
-function spawnBalls(group) {
-  const container = document.getElementById('practiceBallsContainer');
-  if (!container) return;
-  container.innerHTML = '';
-  const dur = 0.4 / state.playbackSpeed;
-  group.forEach(note => {
-    const ball = document.createElement('div');
-    ball.className = 'practice-ball visible';
-    ball.dataset.key = note.key;
-    ball.dataset.idx = note.idx;
-    ball.style.transitionDuration = dur + 's, ' + dur + 's';
-    positionBallAtKey(ball, note.idx);
-    container.appendChild(ball);
-  });
-}
-
-function positionBallAtKey(ball, keyIdx) {
-  const btn = document.getElementById('pnote-' + keyIdx);
-  const grid = document.getElementById('practiceInstrumentGrid');
-  if (!btn || !grid || !ball) return;
-  const gridRect = grid.getBoundingClientRect();
-  const btnRect = btn.getBoundingClientRect();
-  ball.style.left = (btnRect.left - gridRect.left + btnRect.width / 2) + 'px';
-  ball.style.top = (btnRect.top - gridRect.top + btnRect.height / 2) + 'px';
-}
-
-function repositionPracticeBall() {
-  const p = state.practice;
-  if (!p.active || p.noteGroups.length === 0) return;
-  const container = document.getElementById('practiceBallsContainer');
-  if (!container) return;
-  container.querySelectorAll('.practice-ball').forEach(ball => {
-    const idx = parseInt(ball.dataset.idx);
-    if (!isNaN(idx)) positionBallAtKey(ball, idx);
-  });
-}
-
-function clearPracticeTargets() {
-  for (let i = 0; i < 15; i++) {
-    const btn = document.getElementById('pnote-' + i);
-    if (btn) btn.classList.remove('practice-target', 'practice-wrong', 'practice-correct');
-  }
-}
-
-function handlePracticeKeyClick(keyIdx) {
-  const p = state.practice;
-  if (!p.active) return;
-  const group = p.noteGroups[p.groupIndex];
-  if (!group) return;
-  const match = group.find(n => n.idx === keyIdx && !p.pressedInGroup.has(n.key));
-
-  if (match) {
-    p.pressedInGroup.add(match.key);
-    p.stats.correct++;
-    initAudio();
-    if (state.audioContext.state === 'suspended') state.audioContext.resume();
-    const song = getCurrentSong();
-    const songPl = song ? (song.pitchLevel || 0) : 0;
-    const pl = state.userPitchLevel !== 0 ? state.userPitchLevel : songPl;
-    playNote(match.key, pl, state.audioContext.currentTime, 0.5);
-    const btn = document.getElementById('pnote-' + keyIdx);
-    if (btn) {
-      btn.classList.remove('practice-target');
-      btn.classList.add('practice-correct');
-      setTimeout(() => btn.classList.remove('practice-correct'), 350);
-    }
-    const container = document.getElementById('practiceBallsContainer');
-    if (container) {
-      const ball = container.querySelector('.practice-ball[data-key="' + match.key + '"]');
-      if (ball) ball.remove();
-    }
-    if (p.pressedInGroup.size >= group.length) setTimeout(() => advancePractice(), 200);
-    updatePracticeStats();
-  } else {
-    p.stats.wrong++;
-    const btn = document.getElementById('pnote-' + keyIdx);
-    if (btn) {
-      btn.classList.add('practice-wrong');
-      setTimeout(() => btn.classList.remove('practice-wrong'), 400);
-    }
-    updatePracticeStats();
-  }
-}
-
-function advancePractice() {
-  const p = state.practice;
-  p.groupIndex++;
-  if (p.loop.enabled && p.loop.endIdx >= 0 && p.groupIndex > p.loop.endIdx) {
-    p.groupIndex = p.loop.startIdx;
-    moveBallToGroup(p.groupIndex);
-    return;
-  }
-  if (p.groupIndex >= p.noteGroups.length) {
-    stopPractice();
-    const acc = p.stats.correct + p.stats.wrong > 0
-      ? Math.round(p.stats.correct / (p.stats.correct + p.stats.wrong) * 100) : 100;
-    showInfo('练习完成！正确 ' + p.stats.correct + ' 次，错误 ' + p.stats.wrong + ' 次，准确率 ' + acc + '%');
-    setTimeout(() => hideInfo(), 5000);
-    return;
-  }
-  moveBallToGroup(p.groupIndex);
-}
-
-function setLoopA() {
-  const p = state.practice;
-  p.loop.startIdx = p.groupIndex;
-  updateLoopUI();
-  showInfo('循环起点已设置为第 ' + (p.groupIndex + 1) + ' 组音符');
-  setTimeout(() => hideInfo(), 2000);
-}
-
-function setLoopB() {
-  const p = state.practice;
-  p.loop.endIdx = p.groupIndex;
-  updateLoopUI();
-  showInfo('循环终点已设置为第 ' + (p.groupIndex + 1) + ' 组音符');
-  setTimeout(() => hideInfo(), 2000);
-}
-
-function toggleLoop() {
-  const p = state.practice;
-  if (p.loop.endIdx < 0) {
-    showInfo('请先设置 A 点和 B 点');
-    setTimeout(() => hideInfo(), 2000);
-    return;
-  }
-  p.loop.enabled = !p.loop.enabled;
-  updateLoopUI();
-}
-
-function updateLoopUI() {
-  const p = state.practice;
-  const toggle = document.getElementById('practiceLoopToggle');
-  const region = document.getElementById('loopRegion');
-  const markerA = document.getElementById('loopMarkerA');
-  const markerB = document.getElementById('loopMarkerB');
-  if (p.loop.enabled) { toggle.classList.add('loop-active'); toggle.textContent = '循环开'; }
-  else { toggle.classList.remove('loop-active'); toggle.textContent = '循环'; }
-  if (p.noteGroups.length > 0 && p.loop.endIdx >= 0) {
-    const total = p.noteGroups.length;
-    const aPct = (p.loop.startIdx / total) * 100;
-    const bPct = (p.loop.endIdx / total) * 100;
-    markerA.style.left = aPct + '%';
-    markerB.style.left = bPct + '%';
-    region.style.left = aPct + '%';
-    region.style.width = (bPct - aPct) + '%';
-    region.classList.add('visible');
-  } else {
-    region.classList.remove('visible');
-  }
-}
-
-function updatePracticeStats() {
-  const p = state.practice;
-  document.getElementById('practiceProgress').textContent =
-    (p.groupIndex + 1) + ' / ' + p.noteGroups.length;
-  document.getElementById('practiceCorrect').textContent = p.stats.correct;
-  document.getElementById('practiceWrong').textContent = p.stats.wrong;
-}
-
-function updateProgressFill() {
-  const p = state.practice;
-  if (p.noteGroups.length === 0) return;
-  const pct = ((p.groupIndex + 1) / p.noteGroups.length) * 100;
-  document.getElementById('practiceProgressFill').style.width = pct + '%';
-}
 
 // ====================== Note Grid Visualization ======================
 function setupVizCanvas() { /* no-op */ }
@@ -4880,10 +4787,6 @@ state.noteGrid = {
   currentBlockIdx: -1,
 };
 
-state.practiceNoteGrid = {
-  blocks: [],
-  currentBlockIdx: -1,
-};
 
 function buildNoteGrid(song) {
   if (!song || !song.songNotes) return;
@@ -5007,92 +4910,6 @@ function drawVisualization() {
   updateNoteGrid(t);
 }
 
-function buildPracticeNoteGrid(song) {
-  if (!song || !song.songNotes) return;
-  const grid = document.getElementById('practiceNoteGrid');
-  if (!grid) return;
-  grid.innerHTML = '';
-  grid.style.transform = 'translateY(0)';
-
-  const noteMap = {};
-  song.songNotes.forEach(n => {
-    if (!noteMap[n.time]) noteMap[n.time] = [];
-    const idx = keyToGridIndex(n.key);
-    if (idx >= 0 && idx <= 14) {
-      noteMap[n.time].push({ key: n.key, idx: idx, register: n.key.startsWith('2') ? 2 : 1 });
-    }
-  });
-
-  const times = Object.keys(noteMap).map(Number).sort((a, b) => a - b);
-  state.practiceNoteGrid.blocks = [];
-
-  times.forEach(t => {
-    const block = document.createElement('div');
-    block.className = 'ng-block';
-    block.dataset.time = t;
-
-    for (let i = 0; i < 15; i++) {
-      const cell = document.createElement('div');
-      cell.className = 'ng-cell';
-      const noteData = noteMap[t].find(n => n.idx === i);
-      if (noteData) {
-        cell.classList.add('has-note');
-        cell.dataset.key = noteData.key;
-        cell.dataset.register = noteData.register;
-      }
-      block.appendChild(cell);
-    }
-    grid.appendChild(block);
-    state.practiceNoteGrid.blocks.push({ time: t, element: block, notes: noteMap[t] });
-  });
-
-  state.practiceNoteGrid.currentBlockIdx = -1;
-  const posEl = document.getElementById('practiceVizPosition');
-  if (posEl) posEl.textContent = '0 / ' + times.length;
-}
-
-function updatePracticeNoteGrid(idx) {
-  const wrap = document.getElementById('practiceNoteGridWrap');
-  const grid = document.getElementById('practiceNoteGrid');
-  if (!grid || !wrap || state.practiceNoteGrid.blocks.length === 0) return;
-
-  const wrapHeight = wrap.clientHeight;
-  const centerOffset = wrapHeight / 2;
-
-  if (idx !== state.practiceNoteGrid.currentBlockIdx) {
-    for (let i = 0; i < state.practiceNoteGrid.blocks.length; i++) {
-      const blk = state.practiceNoteGrid.blocks[i];
-      blk.element.classList.remove('current-block');
-      blk.element.querySelectorAll('.ng-cell.has-note').forEach(cell => {
-        const reg = cell.dataset.register || '1';
-        cell.classList.remove('playing-1', 'playing-2', 'played-1', 'played-2');
-        if (i < idx) {
-          cell.classList.add('played-' + reg);
-        } else if (i === idx) {
-          cell.classList.add('playing-' + reg);
-        }
-      });
-    }
-    if (idx >= 0 && idx < state.practiceNoteGrid.blocks.length) {
-      state.practiceNoteGrid.blocks[idx].element.classList.add('current-block');
-    }
-    state.practiceNoteGrid.currentBlockIdx = idx;
-  }
-
-  if (idx >= 0 && state.practiceNoteGrid.blocks[idx]) {
-    const blockEl = state.practiceNoteGrid.blocks[idx].element;
-    const blockCenter = blockEl.offsetTop + blockEl.offsetHeight / 2;
-    const targetTransform = centerOffset - blockCenter;
-    const maxScroll = Math.max(0, grid.scrollHeight - wrapHeight);
-    const clampedTransform = Math.max(-maxScroll, Math.min(0, targetTransform));
-    grid.style.transform = 'translateY(' + clampedTransform + 'px)';
-  } else {
-    grid.style.transform = 'translateY(0)';
-  }
-
-  const posEl = document.getElementById('practiceVizPosition');
-  if (posEl) posEl.textContent = (idx + 1) + ' / ' + state.practiceNoteGrid.blocks.length;
-}
 
 // ====================== Starfield ======================
 function initStarfield() {
@@ -5220,7 +5037,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
   uploadArea.addEventListener('click', () => fileInput.click());
   fileInput.addEventListener('change', (e) => {
-    if (e.target.files.length > 0) handleFile(e.target.files[0]);
+    const files = Array.from(e.target.files || []);
+    if (files.length > 0) handleFiles(files);
+    e.target.value = '';
   });
 
   uploadArea.addEventListener('dragover', (e) => {
@@ -5233,7 +5052,7 @@ document.addEventListener('DOMContentLoaded', function() {
   uploadArea.addEventListener('drop', (e) => {
     e.preventDefault();
     uploadArea.classList.remove('dragover');
-    if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
+    handleDrop(e.dataTransfer);
   });
 
   const pasteToggle = document.getElementById('pasteToggle');
@@ -5328,20 +5147,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
-  // Practice page buttons
-  document.getElementById('practiceStartBtn').addEventListener('click', () => {
-    if (state.practice.active) stopPractice();
-    else startPractice();
-  });
-  document.getElementById('practiceResetBtn').addEventListener('click', resetPractice);
-  document.getElementById('practiceLoopA').addEventListener('click', setLoopA);
-  document.getElementById('practiceLoopB').addEventListener('click', setLoopB);
-  document.getElementById('practiceLoopToggle').addEventListener('click', toggleLoop);
-
   // 跟弹悬浮窗(桌面模式):把当前乐谱与键位发给主进程,打开透明置顶悬浮窗
-  const overlayBtn = document.getElementById('practiceOverlayBtn');
-  if (overlayBtn) {
-    overlayBtn.addEventListener('click', () => {
+  window.openPracticeOverlay = function openPracticeOverlay() {
       const song = getCurrentSong();
       if (!song || !song.songNotes || song.songNotes.length === 0) { showError('请先加载乐谱'); return; }
       if (!window.desktopAPI) { showError('请在桌面版应用中使用跟弹悬浮窗'); return; }
@@ -5355,16 +5162,7 @@ document.addEventListener('DOMContentLoaded', function() {
         pitchLevel: state.userPitchLevel !== 0 ? state.userPitchLevel : songPl,
         speed: state.playbackSpeed || 1, // 速度档影响下落快慢
       });
-    });
-  }
-  document.querySelectorAll('#practiceSpeedBtns .practice-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('#practiceSpeedBtns .practice-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      state.playbackSpeed = parseFloat(btn.dataset.speed);
-      updateBallSpeed();
-    });
-  });
+  };
 
   // Instrument selector
   document.querySelectorAll('#instrumentBtns .sel-btn').forEach(btn => {
@@ -5429,15 +5227,8 @@ document.addEventListener('DOMContentLoaded', function() {
       e.preventDefault();
       const idx = state.keyMap[e.code];
       const playerPage = document.getElementById('page-player');
-      const practicePage = document.getElementById('page-practice');
 
-      if (practicePage && practicePage.classList.contains('active')) {
-        const btn = document.getElementById('pnote-' + idx);
-        if (btn && !btn.classList.contains('kb-pressed')) {
-          btn.classList.add('kb-pressed');
-          handlePracticeKeyClick(idx);
-        }
-      } else if (playerPage && playerPage.classList.contains('active')) {
+      if (playerPage && playerPage.classList.contains('active')) {
         const btn = document.getElementById('note-' + idx);
         if (btn && !btn.classList.contains('kb-pressed')) {
           btn.classList.add('kb-pressed');
@@ -5450,10 +5241,8 @@ document.addEventListener('DOMContentLoaded', function() {
   document.addEventListener('keyup', (e) => {
     if (e.code in state.keyMap) {
       const idx = state.keyMap[e.code];
-      ['note-' + idx, 'pnote-' + idx].forEach(id => {
-        const btn = document.getElementById(id);
-        if (btn) btn.classList.remove('kb-pressed');
-      });
+      const btn = document.getElementById('note-' + idx);
+      if (btn) btn.classList.remove('kb-pressed');
     }
   });
 
@@ -5540,7 +5329,6 @@ document.addEventListener('DOMContentLoaded', function() {
       const t = getCurrentPlaybackTime();
       updateNoteGrid(t);
     }
-    if (state.practice.active) repositionPracticeBall();
   });
 });
 </script>

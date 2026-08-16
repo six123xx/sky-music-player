@@ -14,28 +14,29 @@
     color: #eef4ff;
     cursor: default;
   }
-  #app { width: 100vw; height: 100vh; position: relative; display: flex; flex-direction: column; }
+  #app { width: 100vw; height: 100vh; position: relative; overflow: hidden; }
 
-  /* ---------- 顶部工具条(可交互 / 可拖动) ---------- */
+  /* ---------- 顶部工具条(两行:操作按钮 + 参数调节;实心不透明,始终可点击) ---------- */
   .toolbar {
-    position: relative;
-    height: 26px;
+    position: absolute;
+    top: 0; left: 0; right: 0;
     display: flex;
-    align-items: center;
-    gap: 5px;
-    padding: 0 5px 0 8px;
-    background: rgba(12, 18, 32, 0.82);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    flex-direction: column;
+    gap: 2px;
+    padding: 3px 5px;
+    background: #0d1526;
+    border: 1px solid rgba(255, 255, 255, 0.14);
     border-radius: 10px 10px 0 0;
     -webkit-app-region: drag;
-    backdrop-filter: blur(6px);
-    flex: none;
-    z-index: 10;
+    z-index: 20;
   }
+  .tb-row { display: flex; align-items: center; gap: 4px; height: 22px; }
+  .tb-row.sub { height: 19px; }
   .toolbar .grip { width: 10px; height: 10px; opacity: 0.45; flex: none; }
   .toolbar .grip svg { display: block; }
   .song-name {
     flex: 1;
+    min-width: 0;
     font-size: 11px;
     white-space: nowrap;
     overflow: hidden;
@@ -45,13 +46,13 @@
     letter-spacing: 0.3px;
   }
   .status { font-size: 10px; padding: 1px 6px; border-radius: 8px; background: rgba(255,255,255,0.08); color: #9fb4d8; flex: none; }
+  .tb-row.sub .status { margin-left: auto; }
   .status.on { background: rgba(80, 210, 140, 0.22); color: #7fe8b0; }
   .stats { font-size: 10px; color: #a8bcdd; flex: none; white-space: nowrap; }
   .stats .ok { color: #6fe39b; }
   .stats .no { color: #ff8d8d; }
   .btn {
     -webkit-app-region: no-drag;
-    border: none;
     outline: none;
     cursor: pointer;
     font-size: 11px;
@@ -71,106 +72,115 @@
   .btn.adjust.active { background: rgba(255, 200, 90, 0.55); border-color: #ffd97a; color: #fff; }
   .btn.close { background: transparent; border: none; padding: 2px 5px; font-size: 14px; color: #93a6c8; line-height: 1; }
   .btn.close:hover { color: #fff; background: rgba(255,90,90,0.35); }
-  .lead-wrap { flex: none; display: flex; align-items: center; gap: 2px; font-size: 10px; color: #9fb4d8; }
-  .lead-wrap button { width: 16px; height: 16px; line-height: 1; padding: 0; font-size: 12px; }
-  .lead-val { min-width: 34px; text-align: center; }
+  .btn.mini { width: 17px; height: 16px; padding: 0; font-size: 12px; line-height: 1; border-radius: 5px; }
+  .grp { flex: none; font-size: 10px; color: #9fb4d8; }
+  .grp-val { flex: none; min-width: 36px; text-align: center; font-size: 10px; color: #cfe0ff; font-variant-numeric: tabular-nums; }
+  /* 倒计时时长输入框 */
+  .cd-input {
+    flex: none;
+    width: 32px;
+    padding: 1px 3px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 4px;
+    color: #cfe0ff;
+    font-size: 11px;
+    text-align: center;
+    outline: none;
+    -webkit-app-region: no-drag;
+  }
+  .cd-input:focus { border-color: rgba(90, 160, 255, 0.7); }
 
-  /* ---------- 下落轨道区(音符从顶部落到琴键判定线) ---------- */
-  .track-area {
-    position: relative;
-    flex: 1;
-    overflow: hidden;
-    background: rgba(12, 18, 32, 0.55);
-    border-left: 1px solid rgba(255, 255, 255, 0.08);
-    border-right: 1px solid rgba(255, 255, 255, 0.08);
-  }
-  /* 判定线(琴键区顶部) */
-  .hitline {
+  /* ---------- 进度条 ---------- */
+  .progress { position: absolute; top: 49px; left: 0; right: 0; height: 3px; z-index: 10; background: rgba(255,255,255,0.05); }
+  .progress .fill { height: 100%; width: 0%; background: linear-gradient(90deg, #4db4ff, #7fe8b0); border-radius: 2px; transition: width 0.15s; }
+
+  /* ---------- 琴键区(3 行 5 列,占满窗口,可拖动微调对齐游戏按键) ---------- */
+  .keys {
     position: absolute;
-    left: 0; right: 0; bottom: 0;
-    height: 2px;
-    background: linear-gradient(90deg, rgba(120, 200, 255, 0), rgba(140, 210, 255, 0.9), rgba(120, 200, 255, 0));
-    box-shadow: 0 0 8px rgba(120, 200, 255, 0.7);
-    pointer-events: none;
+    top: 52px; left: 0; right: 0; bottom: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+    background: rgba(12, 18, 32, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    z-index: 5;
+    will-change: transform;
   }
-  .note {
+  body.adjust .keys {
+    outline: 2px dashed rgba(255, 210, 120, 0.65);
+    outline-offset: -2px;
+    cursor: move;
+    background: rgba(12, 18, 32, 0.85);
+  }
+  .key-row { display: flex; gap: 10px; flex: 1; }
+  /* 截图对齐模式:琴键按绝对坐标精确定位(覆盖游戏按键) */
+  .keys.aligned { display: block; gap: 0; padding: 0; background: transparent; border-color: transparent; }
+  .keys.aligned .key {
     position: absolute;
-    top: 0;
-    width: 14%;
-    margin-left: -7%;
-    height: 22px;
-    border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 10px;
-    font-weight: 800;
-    color: #fff;
-    pointer-events: none;
-    opacity: 0.95;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.45);
-    transition: opacity 0.15s, transform 0.15s;
+    border-radius: 10px;
+    font-weight: 700;
   }
-  .note .key-char { font-size: 9px; font-weight: 700; opacity: 0.9; margin-left: 3px; }
-  .note.row0 { background: linear-gradient(180deg, rgba(70, 170, 255, 0.95), rgba(30, 100, 220, 0.95)); }
-  .note.row1 { background: linear-gradient(180deg, rgba(190, 130, 255, 0.95), rgba(130, 70, 220, 0.95)); }
-  .note.row2 { background: linear-gradient(180deg, rgba(255, 170, 90, 0.95), rgba(230, 120, 40, 0.95)); }
-  .note.hit { opacity: 0; transform: scale(1.6); }
-  .note.miss { opacity: 0.35; transform: scale(0.8); filter: grayscale(0.7); }
-  .note.approach { box-shadow: 0 2px 14px rgba(140, 220, 255, 0.9); }
-
-  /* ---------- 琴键区(判定目标,3 行 5 列) ---------- */
-  .keys {
-    position: relative;
-    flex: none;
-    padding: 3px 6px 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    background: rgba(12, 18, 32, 0.72);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-top: none;
-    border-radius: 0 0 10px 10px;
-    z-index: 5;
-  }
-  .key-row { display: flex; gap: 3px; flex: 1; }
+  body.adjust .keys.aligned { background: rgba(12, 18, 32, 0.45); }
   .key {
     position: relative;
     flex: 1;
-    border-radius: 6px;
-    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 8px;
+    border: 2px solid rgba(255, 255, 255, 0.18);
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.05));
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
+    font-size: 16px;
     font-weight: 700;
     color: rgba(255, 255, 255, 0.85);
     transition: background 0.12s, border-color 0.12s, box-shadow 0.12s;
   }
-  .key.correct {
-    background: linear-gradient(180deg, rgba(80, 220, 130, 0.55), rgba(40, 160, 90, 0.35));
+  /* 预备高亮:即将要弹的键(提前 leadMs 亮起,呼吸提示) */
+  .key.pending { animation: keyPulse 0.45s ease-in-out infinite alternate; }
+  @keyframes keyPulse {
+    from { transform: scale(1); }
+    to { transform: scale(1.07); }
+  }
+  /* 相邻单音颜色不同,同时间和弦同色 */
+  .key.pending-0 { background: linear-gradient(180deg, rgba(0, 229, 255, 0.85), rgba(0, 160, 255, 0.6)); border-color: #5af0ff; box-shadow: 0 0 16px rgba(0, 229, 255, 0.85); color: #fff; }
+  .key.pending-1 { background: linear-gradient(180deg, rgba(192, 132, 252, 0.85), rgba(140, 80, 220, 0.6)); border-color: #d8b4fe; box-shadow: 0 0 16px rgba(192, 132, 252, 0.85); color: #fff; }
+  .key.pending-2 { background: linear-gradient(180deg, rgba(255, 159, 67, 0.85), rgba(255, 120, 30, 0.6)); border-color: #ffd194; box-shadow: 0 0 16px rgba(255, 159, 67, 0.85); color: #fff; }
+  .key.pending-3 { background: linear-gradient(180deg, rgba(255, 107, 157, 0.85), rgba(255, 60, 120, 0.6)); border-color: #ffb6d5; box-shadow: 0 0 16px rgba(255, 107, 157, 0.85); color: #fff; }
+  .key.pending-4 { background: linear-gradient(180deg, rgba(123, 237, 159, 0.85), rgba(60, 200, 110, 0.6)); border-color: #b0ffd0; box-shadow: 0 0 16px rgba(123, 237, 159, 0.85); color: #142b1e; }
+  .key.pending-5 { background: linear-gradient(180deg, rgba(255, 234, 167, 0.85), rgba(255, 210, 100, 0.6)); border-color: #fff4c2; box-shadow: 0 0 16px rgba(255, 234, 167, 0.85); color: #3d3418; }
+  /* 按中:绿闪 */
+  .key.hit {
+    background: linear-gradient(180deg, rgba(80, 220, 130, 0.85), rgba(40, 160, 90, 0.6));
     border-color: rgba(110, 240, 160, 0.95);
-    box-shadow: 0 0 10px rgba(90, 220, 140, 0.6);
+    box-shadow: 0 0 14px rgba(90, 220, 140, 0.8);
     color: #eafff2;
   }
+  /* 按错:红闪 */
   .key.wrong {
-    background: linear-gradient(180deg, rgba(255, 90, 90, 0.55), rgba(200, 50, 50, 0.35));
+    background: linear-gradient(180deg, rgba(255, 90, 90, 0.85), rgba(200, 50, 50, 0.6));
     border-color: rgba(255, 130, 130, 0.95);
-    box-shadow: 0 0 10px rgba(255, 90, 90, 0.6);
+    box-shadow: 0 0 14px rgba(255, 90, 90, 0.8);
     color: #ffe9e9;
   }
-
-  /* ---------- 底部进度条 ---------- */
-  .progress { height: 3px; background: transparent; flex: none; z-index: 10; }
-  .progress .fill { height: 100%; width: 0%; background: linear-gradient(90deg, #4db4ff, #7fe8b0); border-radius: 2px; transition: width 0.15s; }
+  /* 漏按:暗灰 */
+  .key.miss {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.08));
+    border-color: rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.4);
+  }
 
   /* ---------- 调整模式 ---------- */
   body.adjust #app { outline: 2px dashed rgba(255, 210, 120, 0.9); outline-offset: -2px; }
   .adjust-hint {
     display: none;
     position: absolute;
-    left: 50%; bottom: 8px;
+    left: 50%; bottom: 10px;
     transform: translateX(-50%);
     font-size: 11px;
     color: #ffe9b0;
@@ -178,39 +188,185 @@
     border: 1px solid rgba(255, 210, 120, 0.5);
     border-radius: 8px;
     padding: 4px 12px;
-    z-index: 20;
+    z-index: 30;
     pointer-events: none;
     white-space: nowrap;
   }
   body.adjust .adjust-hint { display: block; }
+
+  /* ---------- 换曲按钮 ---------- */
+  .btn.song { background: rgba(140, 110, 255, 0.3); border-color: rgba(170, 140, 255, 0.45); }
+  .btn.song:hover { background: rgba(140, 110, 255, 0.5); }
+  .btn.song.active { background: rgba(140, 110, 255, 0.65); }
+
+  /* ---------- 换曲面板(悬浮窗内弹出歌曲列表) ---------- */
+  .song-panel {
+    display: none;
+    position: absolute;
+    top: 52px; left: 8px; right: 8px;
+    max-height: 264px;
+    background: rgba(14, 20, 36, 0.97);
+    border: 1px solid rgba(120, 180, 255, 0.4);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    z-index: 50;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .song-panel.show { display: flex; }
+  .song-panel .sp-head {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .song-panel .sp-title { flex: none; font-size: 11px; color: #cfe0ff; font-weight: 600; }
+  .song-panel .sp-close {
+    flex: none;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: #93a6c8;
+    font-size: 13px;
+    line-height: 1;
+    padding: 2px 5px;
+    border-radius: 4px;
+    -webkit-app-region: no-drag;
+  }
+  .song-panel .sp-close:hover { color: #fff; background: rgba(255, 90, 90, 0.35); }
+  .song-list { overflow-y: auto; max-height: 220px; }
+  .song-list::-webkit-scrollbar { width: 6px; }
+  .song-list::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 3px; }
+  .song-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 8px;
+    cursor: pointer;
+    font-size: 11px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    -webkit-app-region: no-drag;
+  }
+  .song-item:hover { background: rgba(90, 160, 255, 0.18); }
+  .song-item.err { color: #ff8d8d; }
+  .song-tag {
+    flex: none;
+    font-size: 9px;
+    padding: 0 4px;
+    border-radius: 4px;
+    background: rgba(140, 110, 255, 0.25);
+    color: #cdb8ff;
+  }
+  .song-tag.cloud { background: rgba(90, 200, 255, 0.22); color: #9fd8ff; }
+  .song-name2 {
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #e8efff;
+    font-weight: 600;
+  }
+  .song-author {
+    flex: none;
+    max-width: 90px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #8fa3c8;
+    font-size: 10px;
+  }
+  .song-loading { padding: 12px; text-align: center; font-size: 11px; color: #9fb4d8; }
+
+  /* ---------- 换曲面板:搜索 / 刷新 / 当前歌曲高亮 ---------- */
+  .sp-search {
+    flex: 1;
+    min-width: 0;
+    font-size: 10px;
+    font-family: inherit;
+    color: #e8efff;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 5px;
+    padding: 2px 6px;
+    outline: none;
+    -webkit-app-region: no-drag;
+    user-select: text;
+  }
+  .sp-search::placeholder { color: #6f83a8; }
+  .sp-refresh:hover { color: #fff; background: rgba(90, 160, 255, 0.4); }
+  .song-item.current { background: rgba(110, 240, 160, 0.14); }
+  .song-item.current .song-tag { background: rgba(110, 240, 160, 0.28); color: #a5ffc9; }
+
+  /* ---------- 换曲成功提示 ---------- */
+  .toast {
+    position: absolute;
+    left: 50%; bottom: 12px;
+    transform: translateX(-50%) translateY(8px);
+    font-size: 11px;
+    color: #eafff2;
+    background: rgba(20, 60, 40, 0.92);
+    border: 1px solid rgba(110, 240, 160, 0.5);
+    border-radius: 8px;
+    padding: 3px 12px;
+    z-index: 60;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.25s, transform 0.25s;
+    white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
 </style>
 </head>
 <body>
 <div id="app">
   <div class="toolbar">
-    <span class="grip">
-      <svg width="10" height="10" viewBox="0 0 10 10">
-        <g fill="#9fb4d8"><rect x="0" y="0" width="4" height="4" rx="1"/><rect x="6" y="0" width="4" height="4" rx="1"/><rect x="0" y="6" width="4" height="4" rx="1"/><rect x="6" y="6" width="4" height="4" rx="1"/></g>
-      </svg>
-    </span>
-    <span class="song-name" id="songName" title="">未知曲目</span>
-    <span class="lead-wrap">
-      <button class="btn" id="leadDown" title="提前量减">−</button>
-      <span class="lead-val" id="leadVal">800ms</span>
-      <button class="btn" id="leadUp" title="提前量加">＋</button>
-    </span>
-    <span class="status" id="status">待机</span>
-    <span class="stats" id="stats"></span>
-    <button class="btn" id="startBtn">开始</button>
-    <button class="btn adjust" id="adjustBtn" title="调整大小对齐游戏琴键">对齐</button>
-    <button class="btn close" id="closeBtn" title="关闭">×</button>
+    <div class="tb-row">
+      <span class="grip">
+        <svg width="10" height="10" viewBox="0 0 10 10">
+          <g fill="#9fb4d8"><rect x="0" y="0" width="4" height="4" rx="1"/><rect x="6" y="0" width="4" height="4" rx="1"/><rect x="0" y="6" width="4" height="4" rx="1"/><rect x="6" y="6" width="4" height="4" rx="1"/></g>
+        </svg>
+      </span>
+      <span class="song-name" id="songName" title="">未知曲目</span>
+      <button class="btn song" id="songBtn" title="从悬浮窗直接更换歌曲">♫</button>
+      <button class="btn" id="startBtn" title="F11 开始/停止跟弹">开始</button>
+      <button class="btn" id="captureBtn" title="F12 截图标记琴键位置,自动对齐">截图</button>
+      <button class="btn adjust" id="adjustBtn" title="拖动琴键微调对齐">微调</button>
+      <button class="btn" id="hideBtn" title="F10 隐藏悬浮窗(再按 F10 显示)">隐藏</button>
+      <button class="btn close" id="closeBtn" title="F9 关闭悬浮窗(再按 F9 打开)">×</button>
+    </div>
+    <div class="tb-row sub">
+      <span class="grp">提前</span>
+      <button class="btn mini" id="leadDown" title="提前量减">−</button>
+      <span class="grp-val" id="leadVal">800ms</span>
+      <button class="btn mini" id="leadUp" title="提前量加">＋</button>
+      <span class="grp">倍速</span>
+      <button class="btn mini" id="speedDown" title="倍速减">−</button>
+      <span class="grp-val" id="speedVal">1.0x</span>
+      <button class="btn mini" id="speedUp" title="倍速加">＋</button>
+      <span class="grp">倒计时</span>
+      <input class="cd-input" id="cdInput" type="number" min="0" max="60" step="0.5"
+             title="开始跟弹前的倒计时(秒),0 表示立即开始" spellcheck="false" />
+      <span class="grp-val">秒</span>
+      <span class="status" id="status">待机</span>
+      <span class="stats" id="stats"></span>
+    </div>
   </div>
-  <div class="track-area" id="trackArea">
-    <div class="hitline"></div>
-  </div>
-  <div class="keys" id="keys"></div>
   <div class="progress"><div class="fill" id="progressFill"></div></div>
-  <div class="adjust-hint">拖动窗口边缘调整大小,拖动顶部移动;完成后点「对齐」退出</div>
+  <div class="song-panel" id="songPanel">
+    <div class="sp-head">
+      <span class="sp-title">更换歌曲</span>
+      <input class="sp-search" id="songSearch" placeholder="搜索歌曲…" spellcheck="false" />
+      <button class="sp-close sp-refresh" id="songRefresh" title="刷新列表">⟳</button>
+      <button class="sp-close" id="songPanelClose" title="关闭">×</button>
+    </div>
+    <div class="song-list" id="songList"></div>
+  </div>
+  <div class="toast" id="toast"></div>
+  <div class="keys" id="keys"></div>
+  <div class="adjust-hint">拖动琴键区微调对齐游戏按键;拖窗口边缘缩放、拖顶部移动窗口;完成后点「对齐」退出</div>
 </div>
 
 <script>
@@ -219,25 +375,59 @@
 
   const api = window.overlayAPI;
   const $ = (id) => document.getElementById(id);
+  const keysEl = $('keys');
 
   let song = null;
-  let keyLabels = [];
   let speed = 1;
 
-  // 下落音符模型
-  let notes = [];        // { time, idx, row, col, el, judged, hit }
-  let spawnIdx = 0;      // 已生成到第几个
+  // 琴键高亮模型:keyQueue[idx] = 该键上按时间排序的音符
+  let keyQueue = [];   // Array(15) of [{ time, idx, hit, color }]
+  let curPtr = [];     // Array(15) 当前处理到第几个
   let active = false;
-  let startClock = 0;    // 开始播放时钟(performance.now)
-  let rafId = 0;
+  let startClock = 0;
+  let timerId = 0;
   let stats = { ok: 0, bad: 0 };
+  let endT = 0;        // 最后一个音符时刻
 
-  let leadMs = 800;      // 提前量:音符从顶到判定线的时间(毫秒)
+  // 开始前倒计时(毫秒,0=不倒计时立即开始)
+  let countdownMs = 3000;
+  let countdownTimer = 0;  // 倒计时定时器句柄
+  let countdownUntil = 0;  // 倒计时结束时刻(performance.now 基准)
+
+  let leadMs = 800;    // 提前量:音符时刻前多少毫秒开始高亮
   const JUDGE_WINDOW = 150; // 判定窗口 ±ms
   const MISS_WINDOW = 180;  // 超过此时长未按即 Miss
-  const TOOLBAR_H = 26;
+  const TOTAL = 15;
+  const COLORS = 6;        // 相邻单音可用颜色数
 
-  const ROW_COLORS = ['row0', 'row1', 'row2'];
+  // 截图对齐数据:{ keys: [{cx,cy,w,h} x15] } 相对窗口坐标(键中心+尺寸)
+  let alignData = null;
+
+  // 琴键区微调对齐状态(保存到 localStorage)
+  let keysState = { offsetX: 0, offsetY: 0 };
+  function loadKeysState() {
+    try {
+      const s = JSON.parse(localStorage.getItem('ov-keys'));
+      if (s && typeof s === 'object') keysState = Object.assign(keysState, s);
+    } catch (e) { /* 忽略 */ }
+  }
+  function saveKeysState() {
+    try { localStorage.setItem('ov-keys', JSON.stringify(keysState)); } catch (e) { /* 忽略 */ }
+  }
+  function applyKeys() {
+    keysEl.style.transform = 'translate(' + keysState.offsetX + 'px,' + keysState.offsetY + 'px)';
+  }
+
+  // 倒计时时长配置(秒,保存到 localStorage)
+  function loadCountdown() {
+    try {
+      const v = parseFloat(localStorage.getItem('ov-countdown'));
+      if (!isNaN(v) && v >= 0 && v <= 60) countdownMs = Math.round(v * 1000);
+    } catch (e) { /* 忽略 */ }
+  }
+  function saveCountdown() {
+    try { localStorage.setItem('ov-countdown', String(countdownMs / 1000)); } catch (e) { /* 忽略 */ }
+  }
 
   // ---------- 工具函数 ----------
   function keyToGridIndex(key) {
@@ -245,12 +435,7 @@
     return m ? parseInt(m[2], 10) : -1;
   }
 
-  function noteKeyChar(key) {
-    const m = String(key).match(/^(\d)Key(\d+)$/);
-    if (!m) return '';
-    const idx = parseInt(m[2], 10);
-    return (keyLabels && keyLabels[idx]) ? keyLabels[idx] : '';
-  }
+  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
 
   function setStatus(text, on) {
     const el = $('status');
@@ -267,41 +452,82 @@
     return document.getElementById('ovk-' + idx);
   }
 
-  // ---------- 渲染琴键(3 行 5 列,随窗口自适应) ----------
+  // ---------- 渲染琴键(3 行 5 列;有截图对齐数据时按绝对坐标定位) ----------
   function renderKeys() {
-    const container = $('keys');
-    container.innerHTML = '';
-    for (let row = 0; row < 3; row++) {
-      const rowEl = document.createElement('div');
-      rowEl.className = 'key-row';
-      for (let col = 0; col < 5; col++) {
-        const idx = row * 5 + col;
+    keysEl.innerHTML = '';
+    if (alignData && alignData.keys && alignData.keys.length === TOTAL) {
+      keysEl.classList.add('aligned');
+      for (let i = 0; i < TOTAL; i++) {
+        const k = alignData.keys[i];
         const key = document.createElement('div');
         key.className = 'key';
-        key.id = 'ovk-' + idx;
-        key.textContent = (keyLabels && keyLabels[idx]) ? keyLabels[idx] : '';
-        rowEl.appendChild(key);
+        key.id = 'ovk-' + i;
+        key.style.left = (k.cx - k.w / 2) + 'px';
+        key.style.top = (k.cy - k.h / 2) + 'px';
+        key.style.width = Math.max(20, k.w) + 'px';
+        key.style.height = Math.max(14, k.h) + 'px';
+        key.style.fontSize = Math.max(10, Math.min(22, k.h * 0.34)) + 'px';
+        keysEl.appendChild(key);
       }
-      container.appendChild(rowEl);
+    } else {
+      keysEl.classList.remove('aligned');
+      for (let row = 0; row < 3; row++) {
+        const rowEl = document.createElement('div');
+        rowEl.className = 'key-row';
+        for (let col = 0; col < 5; col++) {
+          const idx = row * 5 + col;
+          const key = document.createElement('div');
+          key.className = 'key';
+          key.id = 'ovk-' + idx;
+          rowEl.appendChild(key);
+        }
+        keysEl.appendChild(rowEl);
+      }
     }
+    applyKeys();
   }
 
-  // ---------- 构建音符序列(去重:同 time 同 idx 合并) ----------
-  function buildNotes(s) {
+  // ---------- 构建高亮序列(按时间分组,相邻组颜色不同,同组同色) ----------
+  function buildQueue(s) {
     if (!s || !s.songNotes) return [];
-    const map = new Map();
+    // 按时间分组,分配颜色:相邻时间组颜色不同,同时间(和弦)同色
+    const timeMap = new Map();
     s.songNotes.forEach(n => {
       const idx = keyToGridIndex(n.key);
-      if (idx < 0 || idx > 14) return;
-      const k = n.time + '_' + idx;
-      if (!map.has(k)) {
-        map.set(k, { time: n.time, idx: idx, row: Math.floor(idx / 5), col: idx % 5, judged: false, el: null });
-      }
+      if (idx < 0 || idx >= TOTAL) return;
+      if (!timeMap.has(n.time)) timeMap.set(n.time, []);
+      timeMap.get(n.time).push(idx);
     });
-    return Array.from(map.values()).sort((a, b) => a.time - b.time);
+    const times = Array.from(timeMap.keys()).sort((a, b) => a - b);
+    let lastColor = -1;
+    const colorOf = new Map(); // time -> color
+    times.forEach(t => {
+      const color = (lastColor + 1) % COLORS;
+      colorOf.set(t, color);
+      lastColor = color;
+    });
+
+    const groups = Array.from({ length: TOTAL }, () => []);
+    s.songNotes.forEach(n => {
+      const idx = keyToGridIndex(n.key);
+      if (idx < 0 || idx >= TOTAL) return;
+      groups[idx].push({ time: n.time, idx: idx, hit: false, color: colorOf.get(n.time) });
+    });
+    groups.forEach(g => g.sort((a, b) => a.time - b.time));
+    return groups;
   }
 
-  // ---------- 下落动画 ----------
+  function setPendingColor(el, color) {
+    if (!el) return;
+    for (let c = 0; c < COLORS; c++) el.classList.remove('pending-' + c);
+    el.classList.add('pending-' + (color % COLORS));
+  }
+  function clearPendingColor(el) {
+    if (!el) return;
+    for (let c = 0; c < COLORS; c++) el.classList.remove('pending-' + c);
+  }
+
+  // ---------- 高亮动画 ----------
   function currentTimeMs() {
     return (performance.now() - startClock) * speed;
   }
@@ -309,142 +535,143 @@
   function tick(now) {
     if (!active) return;
     const t = currentTimeMs();
-
-    // 生成已到出现时间的音符
-    while (spawnIdx < notes.length && notes[spawnIdx].time - leadMs <= t) {
-      spawnNote(notes[spawnIdx]);
-      spawnIdx++;
+    for (let idx = 0; idx < TOTAL; idx++) {
+      const q = keyQueue[idx];
+      const n = q[curPtr[idx]];
+      const el = keyEl(idx);
+      if (!n) {                      // 该键没有待弹音符
+        if (el) { el.classList.remove('pending'); clearPendingColor(el); }
+        continue;
+      }
+      const d = t - n.time;
+      if (d < -leadMs) {             // 未到提前量,不亮
+        el.classList.remove('pending');
+        clearPendingColor(el);
+      } else if (d <= MISS_WINDOW) { // 提前期 + 到时刻后判定窗口内:持续高亮等待按键
+        el.classList.add('pending');
+        setPendingColor(el, n.color);
+      } else {                       // 超时未按 → Miss
+        missKey(idx, el, n);
+      }
     }
-
-    // 更新位置 + 判 Miss
-    const trackH = $('trackArea').clientHeight;
-    for (const n of notes) {
-      if (!n.el || n.judged) continue;
-      const appearAt = n.time - leadMs;
-      const p = Math.min(1, Math.max(0, (t - appearAt) / leadMs));
-      n.el.style.top = Math.round(p * trackH - n.el.clientHeight / 2) + 'px';
-      n.el.classList.toggle('approach', p > 0.82);
-      // 超过判定窗口仍未按 → Miss
-      if (t > n.time + MISS_WINDOW) missNote(n);
-    }
-
-    // 进度条
-    const endT = notes.length ? notes[notes.length - 1].time : 0;
     const pct = endT ? Math.min(100, Math.round(t / endT * 100)) : 0;
     $('progressFill').style.width = pct + '%';
-
-    rafId = requestAnimationFrame(tick);
-  }
-
-  function spawnNote(n) {
-    const el = document.createElement('div');
-    el.className = 'note ' + ROW_COLORS[n.row];
-    const label = keyLabels && keyLabels[n.idx] ? keyLabels[n.idx] : (n.idx + 1);
-    el.innerHTML = '<span>' + label + '</span>';
-    el.style.left = (n.col * 20 + 10) + '%';
-    const track = $('trackArea');
-    track.appendChild(el);
-    n.el = el;
-  }
-
-  function removeNoteEl(n) {
-    if (n.el && n.el.parentNode) n.el.parentNode.removeChild(n.el);
-    n.el = null;
   }
 
   // ---------- 判定 ----------
-  function hitNote(n, el) {
-    n.judged = true;
+  function hitKey(idx, el) {
     stats.ok++;
-    if (n.el) {
-      n.el.classList.add('hit');
-      const e = n.el;
-      setTimeout(() => { if (e.parentNode) e.parentNode.removeChild(e); }, 180);
-      n.el = null;
-    }
-    if (el) {
-      el.classList.remove('wrong');
-      el.classList.add('correct');
-      setTimeout(() => el.classList.remove('correct'), 260);
-    }
+    el.classList.remove('pending', 'wrong', 'miss');
+    clearPendingColor(el);
+    el.classList.add('hit');
+    setTimeout(() => el.classList.remove('hit'), 300);
     updateStats();
   }
 
-  function missNote(n) {
-    if (n.judged) return;
-    n.judged = true;
+  function missKey(idx, el, n) {
+    n.hit = true;
+    curPtr[idx]++;
     stats.bad++;
-    if (n.el) {
-      n.el.classList.add('miss');
-      const e = n.el;
-      setTimeout(() => { if (e.parentNode) e.parentNode.removeChild(e); }, 300);
-      n.el = null;
-    }
+    el.classList.remove('pending');
+    clearPendingColor(el);
+    el.classList.add('miss');
+    setTimeout(() => el.classList.remove('miss'), 400);
     updateStats();
   }
 
-  function wrongKey(idx) {
+  function wrongKey(idx, el) {
     stats.bad++;
-    const el = keyEl(idx);
-    if (el) {
-      el.classList.remove('correct');
-      el.classList.add('wrong');
-      setTimeout(() => el.classList.remove('wrong'), 260);
-    }
+    el.classList.remove('pending', 'hit', 'miss');
+    clearPendingColor(el);
+    el.classList.add('wrong');
+    setTimeout(() => el.classList.remove('wrong'), 260);
     updateStats();
   }
 
   function handleKey(idx) {
     if (!active) return;
-    if (idx < 0 || idx > 14) return;
+    if (idx < 0 || idx >= TOTAL) return;
     const t = currentTimeMs();
-    // 找该键上未判定、时间最接近且位于判定窗口内的音符
-    let best = null;
-    let bestDiff = Infinity;
-    for (const n of notes) {
-      if (n.judged || n.idx !== idx) continue;
-      const d = Math.abs(t - n.time);
-      if (d <= JUDGE_WINDOW && d < bestDiff) { best = n; bestDiff = d; }
-    }
-    if (best) {
-      hitNote(best, keyEl(idx));
+    const q = keyQueue[idx];
+    const n = q[curPtr[idx]];
+    const el = keyEl(idx);
+    if (n && !n.hit && Math.abs(t - n.time) <= JUDGE_WINDOW) {
+      n.hit = true;
+      curPtr[idx]++;
+      hitKey(idx, el);
     } else {
-      wrongKey(idx);
+      wrongKey(idx, el);
     }
   }
 
   // ---------- 开始 / 停止 ----------
-  function start() {
-    if (!song || !song.songNotes) { setStatus('无乐谱'); return; }
-    notes = buildNotes(song);
-    if (notes.length === 0) { setStatus('无有效音符'); return; }
-    spawnIdx = 0;
+  // 校验乐谱后真正开始跟弹
+  function doStart() {
+    curPtr = keyQueue.map(() => 0);
+    endT = 0;
+    keyQueue.forEach(q => { if (q.length) endT = Math.max(endT, q[q.length - 1].time); });
     stats = { ok: 0, bad: 0 };
     active = true;
     startClock = performance.now();
+    for (let i = 0; i < TOTAL; i++) {
+      const el = keyEl(i);
+      el.classList.remove('pending', 'hit', 'wrong', 'miss');
+      clearPendingColor(el);
+    }
     $('startBtn').textContent = '停止';
     $('startBtn').classList.add('stop');
+    $('startBtn').title = 'F11 开始/停止跟弹';
     setStatus('跟弹中', true);
     updateStats();
     $('progressFill').style.width = '0%';
-    // 清理旧音符 DOM
-    $('trackArea').querySelectorAll('.note').forEach(e => e.remove());
-    rafId = requestAnimationFrame(tick);
+    timerId = setInterval(tick, 16);
+  }
+
+  // 点击开始:先进行用户设定的倒计时,倒计时结束才真正开始
+  function beginCountdown() {
+    if (!song || !song.songNotes) { setStatus('无乐谱'); return; }
+    keyQueue = buildQueue(song);
+    if (keyQueue.every(q => q.length === 0)) { setStatus('无有效音符'); return; }
+    if (countdownMs <= 0) { doStart(); return; }
+    countdownUntil = performance.now() + countdownMs;
+    $('startBtn').classList.add('stop');
+    $('startBtn').title = '倒计时中,点击取消';
+    countdownTimer = setInterval(() => {
+      const left = countdownUntil - performance.now();
+      if (left <= 0) {
+        clearInterval(countdownTimer);
+        countdownTimer = 0;
+        doStart();
+        return;
+      }
+      const secs = Math.ceil(left / 1000);
+      $('startBtn').textContent = String(secs);
+      setStatus('倒计时 ' + secs + ' 秒', true);
+    }, 100);
+    const totalSecs = Math.ceil(countdownMs / 1000);
+    $('startBtn').textContent = String(totalSecs);
+    setStatus('倒计时 ' + totalSecs + ' 秒', true);
   }
 
   function stop() {
+    if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = 0; }
     active = false;
-    if (rafId) cancelAnimationFrame(rafId);
-    $('trackArea').querySelectorAll('.note').forEach(e => e.remove());
-    notes = [];
-    spawnIdx = 0;
+    if (timerId) clearInterval(timerId);
+    for (let i = 0; i < TOTAL; i++) {
+      const el = keyEl(i);
+      el.classList.remove('pending', 'hit', 'wrong', 'miss');
+      clearPendingColor(el);
+    }
+    keyQueue = [];
+    curPtr = [];
     $('startBtn').textContent = '开始';
     $('startBtn').classList.remove('stop');
+    $('startBtn').title = 'F11 开始/停止跟弹';
     setStatus('已停止');
     updateStats();
   }
 
-  // ---------- 调整模式 ----------
+  // ---------- 调整模式(拖动琴键区微调对齐游戏按键) ----------
   let adjustMode = false;
   function setAdjustMode(flag) {
     adjustMode = !!flag;
@@ -452,40 +679,219 @@
     $('adjustBtn').classList.toggle('active', adjustMode);
     $('adjustBtn').textContent = adjustMode ? '完成' : '对齐';
     api.setAdjustMode(adjustMode);
-    // 调整模式下让全窗口可交互;退出后恢复自动穿透
-    if (!adjustMode) setInteractiveByCursor();
+    if (!adjustMode) updateInteractive();
   }
 
-  // 鼠标穿透控制:正常模式下鼠标位于工具条区域可交互,其余区域穿透到游戏
-  function setInteractiveByCursor() {
-    if (adjustMode) { api.setInteractive(true); return; }
-    // 计算当前鼠标位置需要事件坐标;这里用最近一次鼠标位置
-    api.setInteractive(lastCursorY <= TOOLBAR_H);
-  }
-  let lastCursorY = 0;
-  document.addEventListener('mousemove', (e) => {
-    lastCursorY = e.clientY;
-    if (!adjustMode) api.setInteractive(e.clientY <= TOOLBAR_H);
+  let drag = null;
+  keysEl.addEventListener('pointerdown', (e) => {
+    if (!adjustMode) return;
+    if (e.button !== 0) return;
+    drag = { startX: e.clientX, startY: e.clientY, ox: keysState.offsetX, oy: keysState.offsetY };
+    try { keysEl.setPointerCapture(e.pointerId); } catch (err) { /* 忽略 */ }
+    e.preventDefault();
   });
+  keysEl.addEventListener('pointermove', (e) => {
+    if (!drag) return;
+    const dx = e.clientX - drag.startX;
+    const dy = e.clientY - drag.startY;
+    const w = keysEl.clientWidth;
+    const h = keysEl.clientHeight;
+    keysState.offsetX = clamp(drag.ox + dx, -(w * 0.3), w * 0.3);
+    keysState.offsetY = clamp(drag.oy + dy, -(h * 0.4), h * 0.4);
+    applyKeys();
+  });
+  const endDrag = () => { if (drag) { drag = null; saveKeysState(); } };
+  keysEl.addEventListener('pointerup', endDrag);
+  keysEl.addEventListener('pointercancel', endDrag);
+
+  // 鼠标穿透控制:标题栏可点击由主进程按鼠标位置自动判断;
+  // 渲染层仅在上报"整窗可交互"状态(换曲面板打开/调整模式)时通知主进程
+  let songPanelOpen = false;
+  function updateInteractive() {
+    api.setInteractive(adjustMode || songPanelOpen);
+  }
 
   // ---------- 事件绑定 ----------
   $('startBtn').addEventListener('click', () => {
     if (active) stop();
-    else start();
+    else if (countdownTimer) stop();  // 倒计时中点击=取消
+    else beginCountdown();
   });
   $('closeBtn').addEventListener('click', () => api.close());
+  $('hideBtn').addEventListener('click', () => {
+    stop();
+    api.hide();
+  });
   $('adjustBtn').addEventListener('click', () => setAdjustMode(!adjustMode));
+  $('captureBtn').addEventListener('click', () => {
+    // 截图对齐前退出微调模式,避免鼠标穿透干扰
+    if (adjustMode) setAdjustMode(false);
+    api.capture();
+  });
+
+  // ---------- 换曲面板(从悬浮窗直接更换歌曲) ----------
+  const songPanel = $('songPanel');
+  const songList = $('songList');
+  let songCache = [];  // 当前完整曲目列表
+
+  function closeSongPanel() {
+    songPanelOpen = false;
+    songPanel.classList.remove('show');
+    $('songBtn').classList.remove('active');
+    updateInteractive();
+  }
+
+  async function openSongPanel() {
+    if (songPanelOpen) { closeSongPanel(); return; }
+    songPanelOpen = true;
+    songPanel.classList.add('show');
+    $('songBtn').classList.add('active');
+    api.setInteractive(true);
+    if (!songCache.length) {
+      songList.innerHTML = '<div class="song-loading">加载曲目…</div>';
+      try {
+        const res = await api.listSongs();
+        songCache = (res && res.songs) || [];
+      } catch (e) {
+        songCache = [];
+      }
+    }
+    $('songSearch').value = '';
+    renderSongList();
+  }
+
+  function renderSongList() {
+    const kw = ($('songSearch').value || '').trim().toLowerCase();
+    const filtered = kw
+      ? songCache.filter(s =>
+          (s.name || '').toLowerCase().includes(kw) || (s.author || '').toLowerCase().includes(kw))
+      : songCache;
+    if (!filtered.length) {
+      songList.innerHTML = '<div class="song-loading">' + (kw ? '没有匹配的歌曲' : '没有可选的歌曲(可先到主窗口加载或收藏乐谱)') + '</div>';
+      return;
+    }
+    const curName = (song && song.name) || '';
+    songList.innerHTML = '';
+    filtered.forEach((s) => {
+      const isCur = s.name === curName;
+      const row = document.createElement('div');
+      row.className = 'song-item' + (isCur ? ' current' : '');
+      const tag = document.createElement('span');
+      tag.className = 'song-tag' + (s.source === 'cloud' ? ' cloud' : '');
+      tag.textContent = isCur ? '当前' : (s.source === 'cloud' ? '云' : '库');
+      const nameEl = document.createElement('span');
+      nameEl.className = 'song-name2';
+      nameEl.textContent = s.name;
+      const authorEl = document.createElement('span');
+      authorEl.className = 'song-author';
+      authorEl.textContent = s.author || '';
+      row.appendChild(tag);
+      row.appendChild(nameEl);
+      row.appendChild(authorEl);
+      row.title = s.name + (s.author ? ' · ' + s.author : '');
+      row.addEventListener('click', async () => {
+        row.classList.add('err');
+        try {
+          const res = await api.selectSong(s.id);
+          if (res && res.ok) {
+            // 主进程已推送新乐谱到本窗;不自动开始,由用户按 F11 或点「开始」
+            closeSongPanel();
+            showToast('已切换到《' + s.name + '》');
+          } else {
+            row.classList.remove('err');
+            row.textContent = (res && res.error) || '切换失败';
+          }
+        } catch (e) {
+          row.classList.remove('err');
+          row.textContent = '切换失败';
+        }
+      });
+      songList.appendChild(row);
+    });
+  }
+
+  $('songBtn').addEventListener('click', openSongPanel);
+  $('songPanelClose').addEventListener('click', closeSongPanel);
+  $('songRefresh').addEventListener('click', async () => {
+    songCache = [];
+    songList.innerHTML = '<div class="song-loading">加载曲目…</div>';
+    try {
+      const res = await api.listSongs();
+      songCache = (res && res.songs) || [];
+    } catch (e) {
+      songCache = [];
+    }
+    renderSongList();
+  });
+  $('songSearch').addEventListener('input', renderSongList);
+  // 点击面板外区域关闭换曲面板
+  document.addEventListener('pointerdown', (e) => {
+    if (songPanelOpen && !songPanel.contains(e.target) && e.target !== $('songBtn')) {
+      closeSongPanel();
+    }
+  });
+
+  // 主进程快捷键命令
+  api.onCommand((cmd) => {
+    if (cmd === 'toggle-play') {
+      if (active) stop();
+      else if (countdownTimer) stop();  // 倒计时中再按=取消
+      else beginCountdown();
+    } else if (cmd === 'stop') {
+      stop();
+    }
+  });
 
   $('leadDown').addEventListener('click', () => { leadMs = Math.max(400, leadMs - 100); renderLead(); });
   $('leadUp').addEventListener('click', () => { leadMs = Math.min(1500, leadMs + 100); renderLead(); });
   function renderLead() { $('leadVal').textContent = leadMs + 'ms'; }
 
+  // ---------- 倍速控制(0.5x - 2.0x,步进 0.25;与主窗口播放器速度档一致) ----------
+  $('speedDown').addEventListener('click', () => setSpeed(speed - 0.25));
+  $('speedUp').addEventListener('click', () => setSpeed(speed + 0.25));
+  function renderSpeed() {
+    $('speedVal').textContent = speed.toFixed(2).replace(/\.?0+$/, '') + 'x';
+  }
+  function setSpeed(v) {
+    // 改变倍速时保持当前进度不跳变:重算基准时钟
+    const t = currentTimeMs();
+    speed = clamp(v, 0.5, 2);
+    startClock = performance.now() - t / speed;
+    renderSpeed();
+    api.setSpeed(speed);
+  }
+
+  // ---------- 倒计时时长设置(秒,0=立即开始) ----------
+  loadCountdown();
+  const cdInput = $('cdInput');
+  cdInput.value = (countdownMs / 1000).toFixed(countdownMs % 1000 ? 1 : 0);
+  cdInput.addEventListener('change', () => {
+    let v = parseFloat(cdInput.value);
+    if (isNaN(v) || v < 0) v = 0;
+    if (v > 60) v = 60;
+    v = Math.round(v * 10) / 10;  // 支持 0.5 秒粒度
+    countdownMs = Math.round(v * 1000);
+    cdInput.value = v.toFixed(v % 1 ? 1 : 0);
+    saveCountdown();
+    showToast('倒计时设为 ' + cdInput.value + ' 秒');
+  });
+
+  // ---------- 提示条(换曲成功等) ----------
+  let toastTimer = 0;
+  function showToast(text) {
+    const el = $('toast');
+    el.textContent = text;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+  }
+
   // ---------- 主进程消息 ----------
   api.onData((payload) => {
     if (!payload) return;
     song = payload;
-    keyLabels = payload.keyLabels || [];
     speed = (payload.speed && payload.speed > 0) ? payload.speed : 1;
+    renderSpeed();
     $('songName').textContent = payload.name || '未知曲目';
     $('songName').title = (payload.name || '') + ((payload.author) ? ' · ' + payload.author : '');
     renderKeys();
@@ -498,9 +904,19 @@
     if (flag !== adjustMode) setAdjustMode(flag);
   });
 
+  api.onAlignKeys((payload) => {
+    if (!payload || !payload.keys || payload.keys.length !== TOTAL) return;
+    alignData = payload;
+    keysState = { offsetX: 0, offsetY: 0 };
+    applyKeys();
+    renderKeys();
+  });
+
   // 初始渲染
+  loadKeysState();
   renderKeys();
   renderLead();
+  renderSpeed();
 })();
 </script>
 </body>
