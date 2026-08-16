@@ -1,15 +1,70 @@
 {
-  "name": "sky-music-server",
+  "name": "sky-music-player",
   "version": "1.0.0",
-  "description": "光遇乐谱播放器 - 轻量后端（乐谱云存储与分享）",
-  "main": "server.js",
+  "description": "光遇乐谱播放器 - 桌面版(播放器/跟弹/制谱/曲库/解密/简谱)",
+  "author": "SkyMusicPlayer",
+  "license": "MIT",
+  "main": "app/main.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
+    "start": "electron .",
+    "server": "node app/server.js",
+    "dist": "electron-builder --win",
+    "pack": "electron-builder --dir"
+  },
+  "build": {
+    "appId": "com.skymusic.player",
+    "productName": "光遇乐谱播放器",
+    "electronDist": "./node_modules/electron/dist",
+    "directories": {
+      "output": "release"
+    },
+    "afterPack": "./scripts/after-pack.js",
+    "files": [
+      "app/**/*",
+      "package.json"
+    ],
+    "asar": true,
+    "asarUnpack": [
+      "node_modules/koffi/**"
+    ],
+    "win": {
+      "icon": "app/icon.png",
+      "signAndEditExecutable": false,
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "光遇乐谱播放器",
+      "artifactName": "SkyMusicPlayer-Setup-${version}.${ext}"
+    },
+    "portable": {
+      "artifactName": "SkyMusicPlayer-Portable-${version}.${ext}"
+    }
   },
   "dependencies": {
-    "express": "^4.19.2",
-    "better-sqlite3": "^11.1.4",
-    "cors": "^2.8.5"
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "koffi": "^3.1.5"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
   }
 }

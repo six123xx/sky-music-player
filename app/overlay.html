@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline'">
+<title>跟弹悬浮窗</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+  html, body {
+    width: 100%; height: 100%;
+    background: transparent;
+    overflow: hidden;
+    font-family: "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+    color: #eef4ff;
+    cursor: default;
+  }
+  #app { width: 100vw; height: 100vh; position: relative; }
+
+  /* ---------- 顶部工具条(可交互 / 可拖动) ---------- */
+  .toolbar {
+    position: relative;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 6px 0 8px;
+    background: rgba(12, 18, 32, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px 10px 0 0;
+    -webkit-app-region: drag;
+    backdrop-filter: blur(6px);
+  }
+  .toolbar .grip { width: 10px; height: 10px; opacity: 0.45; flex: none; }
+  .toolbar .grip svg { display: block; }
+  .song-name {
+    flex: 1;
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 0.92;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .status { font-size: 10px; padding: 1px 6px; border-radius: 8px; background: rgba(255,255,255,0.08); color: #9fb4d8; flex: none; }
+  .status.on { background: rgba(80, 210, 140, 0.22); color: #7fe8b0; }
+  .stats { font-size: 10px; color: #a8bcdd; flex: none; white-space: nowrap; }
+  .stats .ok { color: #6fe39b; }
+  .stats .no { color: #ff8d8d; }
+  .btn {
+    -webkit-app-region: no-drag;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    font-size: 11px;
+    font-family: inherit;
+    color: #eaf2ff;
+    background: rgba(90, 160, 255, 0.25);
+    border: 1px solid rgba(120, 180, 255, 0.35);
+    border-radius: 6px;
+    padding: 2px 10px;
+    flex: none;
+    transition: background 0.15s;
+  }
+  .btn:hover { background: rgba(90, 160, 255, 0.45); }
+  .btn.stop { background: rgba(255, 110, 110, 0.3); border-color: rgba(255, 130, 130, 0.4); }
+  .btn.stop:hover { background: rgba(255, 110, 110, 0.5); }
+  .btn.close { background: transparent; border: none; padding: 2px 5px; font-size: 14px; color: #93a6c8; line-height: 1; }
+  .btn.close:hover { color: #fff; background: rgba(255,90,90,0.35); }
+
+  /* ---------- 琴键区 ---------- */
+  .keys {
+    padding: 6px 6px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    background: rgba(12, 18, 32, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+  }
+  .key-row { display: flex; gap: 4px; }
+  .key {
+    position: relative;
+    width: 52px;
+    height: 32px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.05));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.85);
+    transition: background 0.12s, border-color 0.12s, box-shadow 0.12s;
+  }
+  .key .ball {
+    position: absolute;
+    top: -4px;
+    left: 50%;
+    width: 9px;
+    height: 9px;
+    margin-left: -4.5px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #ffffff, #59c2ff 55%, #1e7fe0);
+    box-shadow: 0 0 10px 2px rgba(90, 190, 255, 0.95), 0 0 20px 6px rgba(90, 190, 255, 0.35);
+    opacity: 0;
+    transform: scale(0.5);
+    transition: opacity 0.18s, transform 0.18s;
+    pointer-events: none;
+  }
+  .key.target {
+    border-color: rgba(110, 200, 255, 0.95);
+    background: linear-gradient(180deg, rgba(90, 180, 255, 0.42), rgba(40, 100, 200, 0.28));
+    box-shadow: 0 0 12px rgba(90, 190, 255, 0.65), inset 0 0 8px rgba(140, 210, 255, 0.35);
+    color: #fff;
+  }
+  .key.target .ball { opacity: 1; transform: scale(1); }
+  .key.correct {
+    background: linear-gradient(180deg, rgba(80, 220, 130, 0.55), rgba(40, 160, 90, 0.35));
+    border-color: rgba(110, 240, 160, 0.95);
+    box-shadow: 0 0 10px rgba(90, 220, 140, 0.6);
+    color: #eafff2;
+  }
+  .key.wrong {
+    background: linear-gradient(180deg, rgba(255, 90, 90, 0.55), rgba(200, 50, 50, 0.35));
+    border-color: rgba(255, 130, 130, 0.95);
+    box-shadow: 0 0 10px rgba(255, 90, 90, 0.6);
+    color: #ffe9e9;
+  }
+
+  /* ---------- 底部进度条 ---------- */
+  .progress { height: 3px; background: transparent; }
+  .progress .fill { height: 100%; width: 0%; background: linear-gradient(90deg, #4db4ff, #7fe8b0); border-radius: 2px; transition: width 0.2s; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="toolbar">
+    <span class="grip">
+      <svg width="10" height="10" viewBox="0 0 10 10">
+        <g fill="#9fb4d8"><rect x="0" y="0" width="4" height="4" rx="1"/><rect x="6" y="0" width="4" height="4" rx="1"/><rect x="0" y="6" width="4" height="4" rx="1"/><rect x="6" y="6" width="4" height="4" rx="1"/></g>
+      </svg>
+    </span>
+    <span class="song-name" id="songName" title="">未知曲目</span>
+    <span class="status" id="status">待机</span>
+    <span class="stats" id="stats"></span>
+    <button class="btn" id="startBtn">开始</button>
+    <button class="btn close" id="closeBtn" title="关闭">×</button>
+  </div>
+  <div class="keys" id="keys"></div>
+  <div class="progress"><div class="fill" id="progressFill"></div></div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  const api = window.overlayAPI;
+  const $ = (id) => document.getElementById(id);
+
+  let song = null;
+  let keyMap = {};
+  let keyLabels = [];
+  let pitchLevel = 0;
+
+  let noteGroups = [];
+  let groupIndex = 0;
+  let pressedInGroup = new Set();
+  let active = false;
+  let stats = { correct: 0, wrong: 0 };
+
+  const TOOLBAR_H = 26;
+
+  // ---------- 工具函数 ----------
+  function keyToGridIndex(key) {
+    const m = String(key).match(/^(\d)Key(\d+)$/);
+    return m ? parseInt(m[2], 10) : -1;
+  }
+
+  function buildPracticeGroups(s) {
+    if (!s || !s.songNotes) return [];
+    const map = {};
+    s.songNotes.forEach(n => {
+      if (!map[n.time]) map[n.time] = [];
+      const idx = keyToGridIndex(n.key);
+      if (idx >= 0 && idx <= 14) map[n.time].push({ key: n.key, idx: idx, register: String(n.key).startsWith('2') ? 2 : 1 });
+    });
+    return Object.keys(map).map(Number).sort((a, b) => a - b).map(t => map[t]);
+  }
+
+  function keyEl(idx) {
+    return document.getElementById('ovk-' + idx);
+  }
+
+  function setStatus(text, on) {
+    const el = $('status');
+    el.textContent = text;
+    el.classList.toggle('on', !!on);
+  }
+
+  function updateStats() {
+    const total = noteGroups.length;
+    $('stats').innerHTML =
+      '<span class="ok">✓' + stats.correct + '</span> <span class="no">✗' + stats.wrong + '</span>';
+    const pct = total ? Math.min(100, Math.round((groupIndex / total) * 100)) : 0;
+    $('progressFill').style.width = pct + '%';
+  }
+
+  // ---------- 渲染琴键 ----------
+  function renderKeys() {
+    const container = $('keys');
+    container.innerHTML = '';
+    for (let row = 0; row < 3; row++) {
+      const rowEl = document.createElement('div');
+      rowEl.className = 'key-row';
+      for (let col = 0; col < 5; col++) {
+        const idx = row * 5 + col;
+        const key = document.createElement('div');
+        key.className = 'key';
+        key.id = 'ovk-' + idx;
+        const label = (keyLabels && keyLabels[idx]) ? keyLabels[idx] : '';
+        key.innerHTML = '<span>' + label + '</span><span class="ball"></span>';
+        rowEl.appendChild(key);
+      }
+      container.appendChild(rowEl);
+    }
+  }
+
+  // ---------- 跟弹核心 ----------
+  function clearTargets() {
+    for (let i = 0; i < 15; i++) {
+      const el = keyEl(i);
+      if (el) el.classList.remove('target', 'correct', 'wrong');
+    }
+  }
+
+  function moveBallToGroup(idx) {
+    const group = noteGroups[idx];
+    if (!group) return;
+    clearTargets();
+    group.forEach(n => {
+      const el = keyEl(n.idx);
+      if (el) el.classList.add('target');
+    });
+    pressedInGroup = new Set();
+    groupIndex = idx;
+    updateStats();
+  }
+
+  function start() {
+    if (!song || !song.songNotes) { setStatus('无乐谱'); return; }
+    noteGroups = buildPracticeGroups(song);
+    if (noteGroups.length === 0) { setStatus('无有效音符'); return; }
+    groupIndex = 0;
+    pressedInGroup = new Set();
+    stats = { correct: 0, wrong: 0 };
+    active = true;
+    $('startBtn').textContent = '停止';
+    $('startBtn').classList.add('stop');
+    setStatus('跟弹中', true);
+    moveBallToGroup(0);
+  }
+
+  function stop() {
+    active = false;
+    clearTargets();
+    $('startBtn').textContent = '开始';
+    $('startBtn').classList.remove('stop');
+    setStatus('已停止');
+    updateStats();
+  }
+
+  function complete() {
+    active = false;
+    clearTargets();
+    $('startBtn').textContent = '开始';
+    $('startBtn').classList.remove('stop');
+    setStatus('完成', true);
+    $('progressFill').style.width = '100%';
+    updateStats();
+  }
+
+  function advance() {
+    groupIndex++;
+    if (groupIndex >= noteGroups.length) { complete(); return; }
+    moveBallToGroup(groupIndex);
+  }
+
+  function handleKey(idx) {
+    if (!active) return;
+    if (idx < 0 || idx > 14) return;
+    const group = noteGroups[groupIndex];
+    if (!group) return;
+    const match = group.find(n => n.idx === idx && !pressedInGroup.has(n.key));
+    const el = keyEl(idx);
+    if (!el) return;
+
+    if (match) {
+      pressedInGroup.add(match.key);
+      stats.correct++;
+      el.classList.remove('target');
+      el.classList.add('correct');
+      el.querySelector('.ball').style.opacity = '0';
+      setTimeout(() => el.classList.remove('correct'), 320);
+      if (pressedInGroup.size >= group.length) setTimeout(advance, 180);
+    } else {
+      stats.wrong++;
+      el.classList.add('wrong');
+      setTimeout(() => el.classList.remove('wrong'), 320);
+    }
+    updateStats();
+  }
+
+  // ---------- 事件绑定 ----------
+  $('startBtn').addEventListener('click', () => {
+    if (active) stop();
+    else start();
+  });
+  $('closeBtn').addEventListener('click', () => api.close());
+
+  // 鼠标穿透控制:鼠标位于工具条区域时关闭穿透(可点击/拖动),其余区域穿透到游戏
+  document.addEventListener('mousemove', (e) => {
+    const interactive = e.clientY <= TOOLBAR_H;
+    api.setInteractive(interactive);
+  });
+
+  // ---------- 主进程消息 ----------
+  api.onData((payload) => {
+    if (!payload) return;
+    song = payload;
+    keyMap = payload.keyMap || {};
+    keyLabels = payload.keyLabels || [];
+    pitchLevel = payload.pitchLevel || 0;
+    $('songName').textContent = payload.name || '未知曲目';
+    $('songName').title = (payload.name || '') + ((payload.author) ? ' · ' + payload.author : '');
+    renderKeys();
+    stop();
+  });
+
+  api.onKey((idx) => handleKey(idx));
+
+  // 初始渲染
+  renderKeys();
+})();
+</script>
+</body>
+</html>
