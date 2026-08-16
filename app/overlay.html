@@ -6,6 +6,10 @@
 <title>跟弹悬浮窗</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+  html {
+    /* 谱面缩放比例(默认 100%),可在「谱面」调整模式下用滚轮自由调节 */
+    --scroll-scale: 1;
+  }
   html, body {
     width: 100%; height: 100%;
     background: transparent;
@@ -98,11 +102,15 @@
   /* ---------- 琴键区(3 行 5 列,占满窗口,可拖动微调对齐游戏按键) ---------- */
   .keys {
     position: absolute;
-    top: 52px; left: 0; right: 0; bottom: 0;
+    top: 52px; left: 0; right: 0;
+    width: min(480px, 92%);
+    margin: 0 auto;
+    bottom: calc((66px * var(--scroll-scale, 1)) * var(--scroll-rows, 1)
+                 + (14px * var(--scroll-scale, 1)) * (var(--scroll-rows, 1) - 1) + 10px);
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    padding: 10px;
+    gap: 8px;
+    padding: 8px;
     background: rgba(12, 18, 32, 0.72);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 8px;
@@ -115,7 +123,7 @@
     cursor: move;
     background: rgba(12, 18, 32, 0.85);
   }
-  .key-row { display: flex; gap: 10px; flex: 1; }
+  .key-row { display: flex; gap: 8px; flex: 1; }
   /* 截图对齐模式:琴键按绝对坐标精确定位(覆盖游戏按键) */
   .keys.aligned { display: block; gap: 0; padding: 0; background: transparent; border-color: transparent; }
   .keys.aligned .key {
@@ -130,13 +138,13 @@
   .key {
     position: relative;
     flex: 1;
-    border-radius: 8px;
+    border-radius: 6px;
     border: 2px solid rgba(255, 255, 255, 0.18);
     background: linear-gradient(180deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.05));
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
+    font-size: 13px;
     font-weight: 700;
     color: rgba(255, 255, 255, 0.85);
     transition: background 0.12s, border-color 0.12s, box-shadow 0.12s;
@@ -146,6 +154,35 @@
   @keyframes keyPulse {
     from { transform: scale(1); }
     to { transform: scale(1.07); }
+  }
+  /* 下一个要弹的键(所有待弹键中时间最近的,和弦则整组):最醒目提示 */
+  .key.next {
+    animation: nextPulse 0.35s ease-in-out infinite alternate;
+    border-width: 3px;
+    z-index: 2;
+  }
+  @keyframes nextPulse {
+    from { transform: scale(1.06); filter: brightness(1.15); }
+    to { transform: scale(1.14); filter: brightness(1.5); }
+  }
+  /* 下一个键的剩余时间倒计时角标 */
+  .key .next-badge {
+    position: absolute;
+    top: -7px; right: -7px;
+    min-width: 20px; height: 16px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #0d1526;
+    font-size: 10px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+    pointer-events: none;
+    z-index: 3;
   }
   /* 相邻单音颜色不同,同时间和弦同色 */
   .key.pending-0 { background: linear-gradient(180deg, rgba(0, 229, 255, 0.85), rgba(0, 160, 255, 0.6)); border-color: #5af0ff; box-shadow: 0 0 16px rgba(0, 229, 255, 0.85); color: #fff; }
@@ -299,6 +336,113 @@
   .song-item.current { background: rgba(110, 240, 160, 0.14); }
   .song-item.current .song-tag { background: rgba(110, 240, 160, 0.28); color: #a5ffc9; }
 
+  /* ---------- 底部滚动谱面(3×5 网格块,每排 5 块,垂直滚动) ---------- */
+  .scroller {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: calc((66px * var(--scroll-scale, 1)) * var(--scroll-rows, 1)
+                 + (14px * var(--scroll-scale, 1)) * (var(--scroll-rows, 1) - 1) + 10px);
+    background: rgba(12, 18, 32, 0.92);
+    border: none;
+    z-index: 5;
+    overflow: hidden;
+  }
+  /* 谱面位置调整模式 */
+  body.scroll-adjust .scroller {
+    border: 2px dashed rgba(255, 214, 79, 0.75);
+    cursor: move;
+    background: rgba(20, 26, 44, 0.95);
+  }
+  .sc-notes {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(5, calc(110px * var(--scroll-scale, 1)));
+    grid-auto-rows: calc(66px * var(--scroll-scale, 1));
+    align-content: start;
+    justify-content: center;
+    gap: calc(14px * var(--scroll-scale, 1));
+    padding: 4px 10px;
+    transition: transform 0.18s ease-out;
+    will-change: transform;
+  }
+  /* 无乐谱时的空白骨架:自动缓慢滚动,保证空白谱面也有滚动效果 */
+  .sc-notes.preview {
+    transition: none;
+    animation: scPreviewScroll 1.6s linear infinite;
+  }
+  @keyframes scPreviewScroll {
+    from { transform: translateY(0); }
+    to { transform: translateY(calc(-1 * ((66px * var(--scroll-scale, 1)) + (14px * var(--scroll-scale, 1))))); }
+  }
+  /* 固定 110×66(5:3),内部 padding/gap 按 1:2 配比,15 个按键格恒为正方形;无外框边界 */
+  .sc-block {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    gap: calc(6px * var(--scroll-scale, 1));
+    width: calc(110px * var(--scroll-scale, 1));
+    height: calc(66px * var(--scroll-scale, 1));
+    padding: calc(3px * var(--scroll-scale, 1));
+    background: transparent;
+    border: none;
+    transition: background 0.12s ease, box-shadow 0.12s ease;
+  }
+  /* 当前块(判定位):不用外框,靠整排格子提亮表示 */
+  .sc-block.current-block {
+    background: transparent;
+    box-shadow: none;
+  }
+  .sc-block.current-block .sc-cell {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.16);
+  }
+  /* 倒计时期间的空白预滚块:极淡占位,不显示音符,无虚线边界 */
+  .sc-block.blank {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+  }
+  /* 空白块滚到判定位时同样给出淡高亮,滚动效果连贯不断档 */
+  .sc-block.blank.current-block {
+    background: transparent;
+    box-shadow: none;
+  }
+  .sc-block.blank.current-block .sc-cell {
+    background: rgba(255, 255, 255, 0.055);
+  }
+  .sc-block.blank .sc-cell {
+    background: rgba(255, 255, 255, 0.02);
+    border-color: transparent;
+  }
+  .sc-cell {
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.055);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    transition: background 0.12s ease, border-color 0.12s ease;
+  }
+  .sc-cell.has-note { background: rgba(255, 255, 255, 0.22); border-color: rgba(255, 255, 255, 0.3); }
+  .sc-cell.playing-1 { background: #f2f2f2; border-color: #ffffff; box-shadow: 0 0 5px rgba(255, 255, 255, 0.9); }
+  .sc-cell.playing-2 { background: #7d7d7d; border-color: #b5b5b5; box-shadow: 0 0 5px rgba(255, 255, 255, 0.5); }
+  .sc-cell.played-1 { background: rgba(255, 255, 255, 0.13); border-color: rgba(255, 255, 255, 0.18); }
+  .sc-cell.played-2 { background: rgba(140, 140, 140, 0.2); border-color: rgba(180, 180, 180, 0.25); }
+  /* 垂直滚动模式:竖直判定线不再需要 */
+  .sc-guide { display: none; }
+  /* 截图对齐模式:琴键区域拉满,但滚动谱面始终保留在最底部 */
+  body.has-align .keys { bottom: 0; }
+  .sc-hint {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.4);
+    letter-spacing: 1px;
+    pointer-events: none;
+    z-index: 1;
+  }
+
   /* ---------- 换曲成功提示 ---------- */
   .toast {
     position: absolute;
@@ -334,6 +478,7 @@
       <button class="btn" id="startBtn" title="F11 开始/停止跟弹">开始</button>
       <button class="btn" id="captureBtn" title="F12 截图标记琴键位置,自动对齐">截图</button>
       <button class="btn adjust" id="adjustBtn" title="拖动琴键微调对齐">微调</button>
+      <button class="btn" id="scrollBtn" title="进入谱面调整:拖动移动位置,滚轮调大小,Ctrl+滚轮或↑↓切排数">谱面</button>
       <button class="btn" id="hideBtn" title="F10 隐藏悬浮窗(再按 F10 显示)">隐藏</button>
       <button class="btn close" id="closeBtn" title="F9 关闭悬浮窗(再按 F9 打开)">×</button>
     </div>
@@ -366,6 +511,11 @@
   </div>
   <div class="toast" id="toast"></div>
   <div class="keys" id="keys"></div>
+  <div class="scroller" id="scroller">
+    <div class="sc-notes" id="scNotes"></div>
+    <div class="sc-guide"></div>
+    <div class="sc-hint" id="scHint">加载乐谱后显示滚动谱面</div>
+  </div>
   <div class="adjust-hint">拖动琴键区微调对齐游戏按键;拖窗口边缘缩放、拖顶部移动窗口;完成后点「对齐」退出</div>
 </div>
 
@@ -400,6 +550,10 @@
   const TOTAL = 15;
   const COLORS = 6;        // 相邻单音可用颜色数
 
+  // 底部滚动谱面:3×5 网格块,每排 5 块,垂直滚动
+  let scBlocks = [];         // [{ time, element, notes }]
+  let scCurIdx = -1;         // 当前块索引
+
   // 截图对齐数据:{ keys: [{cx,cy,w,h} x15] } 相对窗口坐标(键中心+尺寸)
   let alignData = null;
 
@@ -417,6 +571,111 @@
   function applyKeys() {
     keysEl.style.transform = 'translate(' + keysState.offsetX + 'px,' + keysState.offsetY + 'px)';
   }
+
+  // 谱面位置调整状态(保存到 localStorage)
+  let scrollPos = { offsetX: 0, offsetY: 0 };
+  function loadScrollPos() {
+    try {
+      const s = JSON.parse(localStorage.getItem('ov-scroll'));
+      if (s && typeof s === 'object') scrollPos = Object.assign(scrollPos, s);
+    } catch (e) { /* 忽略 */ }
+  }
+  function saveScrollPos() {
+    try { localStorage.setItem('ov-scroll', JSON.stringify(scrollPos)); } catch (e) { /* 忽略 */ }
+  }
+  function applyScrollPos() {
+    const sc = $('scroller');
+    if (sc) sc.style.transform = 'translate(' + scrollPos.offsetX + 'px,' + scrollPos.offsetY + 'px)';
+  }
+  let scrollAdjustMode = false;
+  function setScrollAdjustMode(flag) {
+    scrollAdjustMode = !!flag;
+    document.body.classList.toggle('scroll-adjust', scrollAdjustMode);
+    $('scrollBtn').classList.toggle('active', scrollAdjustMode);
+    $('scrollBtn').textContent = scrollAdjustMode ? '完成' : '谱面';
+    updateInteractive();
+  }
+
+  // 谱面大小缩放(0.5x - 2.5x,保存到 localStorage;调整模式下滚轮自由调节)
+  let scrollScale = 1;
+  const MIN_SCALE = 0.5, MAX_SCALE = 2.5, SCALE_STEP = 0.1;
+  function loadScrollScale() {
+    try {
+      const v = parseFloat(localStorage.getItem('ov-scroll-scale'));
+      if (!isNaN(v) && v >= MIN_SCALE && v <= MAX_SCALE) scrollScale = v;
+    } catch (e) { /* 忽略 */ }
+  }
+  function saveScrollScale() {
+    try { localStorage.setItem('ov-scroll-scale', String(scrollScale)); } catch (e) { /* 忽略 */ }
+  }
+  function applyScrollScale() {
+    document.documentElement.style.setProperty('--scroll-scale', scrollScale.toFixed(3));
+  }
+  // 谱面排数(1-6 排,默认 4 排,保存到 localStorage;调整模式下 Ctrl+滚轮或 ↑↓ 调节)
+  let scrollRows = 4;
+  const MIN_ROWS = 1, MAX_ROWS = 6;
+  function loadScrollRows() {
+    try {
+      const v = parseInt(localStorage.getItem('ov-scroll-rows'), 10);
+      if (!isNaN(v) && v >= MIN_ROWS && v <= MAX_ROWS) scrollRows = v;
+    } catch (e) { /* 忽略 */ }
+  }
+  function saveScrollRows() {
+    try { localStorage.setItem('ov-scroll-rows', String(scrollRows)); } catch (e) { /* 忽略 */ }
+  }
+  function applyScrollRows() {
+    document.documentElement.style.setProperty('--scroll-rows', String(scrollRows));
+  }
+  const scrollerEl = $('scroller');
+  let scDrag = null;
+  scrollerEl.addEventListener('pointerdown', (e) => {
+    if (!scrollAdjustMode) return;
+    if (e.button !== 0) return;
+    scDrag = { startX: e.clientX, startY: e.clientY, ox: scrollPos.offsetX, oy: scrollPos.offsetY };
+    try { scrollerEl.setPointerCapture(e.pointerId); } catch (err) { /* 忽略 */ }
+    e.preventDefault();
+  });
+  scrollerEl.addEventListener('pointermove', (e) => {
+    if (!scDrag) return;
+    const dx = e.clientX - scDrag.startX;
+    const dy = e.clientY - scDrag.startY;
+    scrollPos.offsetX = clamp(scDrag.ox + dx, -200, 200);
+    scrollPos.offsetY = clamp(scDrag.oy + dy, -200, 200);
+    applyScrollPos();
+  });
+  const endScDrag = () => { if (scDrag) { scDrag = null; saveScrollPos(); } };
+  scrollerEl.addEventListener('pointerup', endScDrag);
+  scrollerEl.addEventListener('pointercancel', endScDrag);
+  // 谱面调整模式下:滚轮自由调节大小;Ctrl+滚轮切换排数
+  scrollerEl.addEventListener('wheel', (e) => {
+    if (!scrollAdjustMode) return;
+    e.preventDefault();
+    if (e.ctrlKey) {
+      scrollRows = clamp(scrollRows + (e.deltaY < 0 ? 1 : -1), MIN_ROWS, MAX_ROWS);
+      applyScrollRows();
+      saveScrollRows();
+      if (scBlocks.length) updateScroll(currentTimeMs());
+      showToast('谱面 ' + scrollRows + ' 排');
+    } else {
+      scrollScale = clamp(scrollScale + (e.deltaY < 0 ? SCALE_STEP : -SCALE_STEP), MIN_SCALE, MAX_SCALE);
+      applyScrollScale();
+      saveScrollScale();
+      if (scBlocks.length) updateScroll(currentTimeMs());
+      showToast('谱面 ' + Math.round(scrollScale * 100) + '%');
+    }
+  }, { passive: false });
+  // 谱面调整模式下:↑↓ 键切换排数
+  window.addEventListener('keydown', (e) => {
+    if (!scrollAdjustMode) return;
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      scrollRows = clamp(scrollRows + (e.key === 'ArrowUp' ? 1 : -1), MIN_ROWS, MAX_ROWS);
+      applyScrollRows();
+      saveScrollRows();
+      if (scBlocks.length) updateScroll(currentTimeMs());
+      showToast('谱面 ' + scrollRows + ' 排');
+    }
+  });
 
   // 倒计时时长配置(秒,保存到 localStorage)
   function loadCountdown() {
@@ -457,6 +716,7 @@
     keysEl.innerHTML = '';
     if (alignData && alignData.keys && alignData.keys.length === TOTAL) {
       keysEl.classList.add('aligned');
+      document.body.classList.add('has-align');
       for (let i = 0; i < TOTAL; i++) {
         const k = alignData.keys[i];
         const key = document.createElement('div');
@@ -471,6 +731,7 @@
       }
     } else {
       keysEl.classList.remove('aligned');
+      document.body.classList.remove('has-align');
       for (let row = 0; row < 3; row++) {
         const rowEl = document.createElement('div');
         rowEl.className = 'key-row';
@@ -485,6 +746,145 @@
       }
     }
     applyKeys();
+  }
+
+  // ---------- 滚动谱面(3×5 网格块,每排 5 块,垂直滚动) ----------
+  const BLANK_STEP = 250;   // 每个空白块对应 250ms(空白停顿处按此粒度填充)
+  // 生成一个空白块(无音符),返回元素
+  function makeBlankBlock(t) {
+    const bEl = document.createElement('div');
+    bEl.className = 'sc-block blank';
+    bEl.dataset.time = t;
+    for (let j = 0; j < TOTAL; j++) {
+      const cell = document.createElement('div');
+      cell.className = 'sc-cell';
+      bEl.appendChild(cell);
+    }
+    return bEl;
+  }
+  function buildScroll() {
+    const box = $('scNotes');
+    box.innerHTML = '';
+    scBlocks = [];
+    scCurIdx = -1;
+    const hint = $('scHint');
+    if (!song || !song.songNotes) {
+      if (hint) hint.style.display = 'flex';
+      // 无乐谱:生成空白骨架块并启用自动滚动,空白谱面也有滚动效果
+      const blankCount = Math.max(scrollRows, 4) * 5;
+      for (let i = 0; i < blankCount; i++) {
+        const bEl = makeBlankBlock(i * BLANK_STEP);
+        box.appendChild(bEl);
+        scBlocks.push({ time: i * BLANK_STEP, element: bEl, notes: [], blank: true });
+      }
+      box.classList.add('preview');
+      return;
+    }
+    if (hint) hint.style.display = 'none';
+    box.classList.remove('preview');
+    // 按时刻分组:同一时刻的所有音归入同一个块
+    const noteMap = {};
+    song.songNotes.forEach(n => {
+      const idx = keyToGridIndex(n.key);
+      if (idx < 0 || idx >= TOTAL) return;
+      if (!noteMap[n.time]) noteMap[n.time] = [];
+      noteMap[n.time].push({ idx: idx, register: n.key.startsWith('2') ? 2 : 1 });
+    });
+    const times = Object.keys(noteMap).map(Number).sort((a, b) => a - b);
+    // 倒计时空白预滚块:在谱面最前面插入若干空白块(负时间),
+    // 让倒计时期间谱面就开始正确滚动,倒计时结束第一个音符正好滚到判定线
+    if (countdownMs > 0) {
+      const blankCount = Math.min(Math.ceil(countdownMs / BLANK_STEP), 40);   // 上限 10 秒
+      for (let i = 0; i < blankCount; i++) {
+        const bt = -countdownMs + i * BLANK_STEP;
+        const bEl = makeBlankBlock(bt);
+        box.appendChild(bEl);
+        scBlocks.push({ time: bt, element: bEl, notes: [], blank: true });
+      }
+    }
+    // 遍历时刻,在相邻音符间空白停顿处(间隔超过一个粒度)插入空白块,
+    // 让停顿的时长在谱面上正确体现
+    let prevT = null;
+    times.forEach(t => {
+      if (prevT !== null) {
+        const gap = t - prevT;
+        const fill = Math.max(0, Math.floor(gap / BLANK_STEP) - 1);   // 中间的空白块数量
+        for (let k = 1; k <= fill; k++) {
+          const bt = prevT + k * BLANK_STEP;
+          const bEl = makeBlankBlock(bt);
+          box.appendChild(bEl);
+          scBlocks.push({ time: bt, element: bEl, notes: [], blank: true });
+        }
+      }
+      prevT = t;
+      const block = document.createElement('div');
+      block.className = 'sc-block';
+      block.dataset.time = t;
+      // 3 行 × 5 列 = 15 格,对应 15 个琴键(第 1/2/3 排)
+      for (let i = 0; i < TOTAL; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'sc-cell';
+        const nd = noteMap[t].find(x => x.idx === i);
+        if (nd) {
+          cell.classList.add('has-note');
+          cell.dataset.register = nd.register;
+        }
+        block.appendChild(cell);
+      }
+      box.appendChild(block);
+      scBlocks.push({ time: t, element: block, notes: noteMap[t] });
+    });
+    updateScroll(0);
+  }
+
+  function updateScroll(t) {
+    const grid = $('scNotes');
+    const wrap = $('scroller');
+    if (!grid || !wrap || scBlocks.length === 0) return;
+    if (grid.classList.contains('preview')) return;  // 空白预览模式由 CSS 动画驱动,不在此定位
+    // 当前块:最后一个 time <= t 的块
+    let curIdx = -1;
+    for (let i = 0; i < scBlocks.length; i++) {
+      if (scBlocks[i].time <= t) curIdx = i; else break;
+    }
+    if (curIdx !== scCurIdx) {
+      // 已弹过的块标记 played
+      for (let i = 0; i < curIdx && i < scBlocks.length; i++) {
+        const blk = scBlocks[i];
+        blk.element.classList.remove('current-block');
+        blk.element.querySelectorAll('.sc-cell.has-note').forEach(cell => {
+          cell.classList.remove('playing-1', 'playing-2', 'played-1', 'played-2');
+          cell.classList.add('played-' + (cell.dataset.register || '1'));
+        });
+      }
+      // 当前块高亮(空白块也用淡高亮,保证滚动效果连贯),后续块恢复未弹状态
+      scBlocks.forEach((b, i) => {
+        b.element.classList.toggle('current-block', i === curIdx);
+        if (i === curIdx) {
+          b.element.querySelectorAll('.sc-cell.has-note').forEach(cell => {
+            cell.classList.remove('played-1', 'played-2', 'playing-1', 'playing-2');
+            cell.classList.add('playing-' + (cell.dataset.register || '1'));
+          });
+        } else if (i > curIdx) {
+          b.element.querySelectorAll('.sc-cell.playing-1, .sc-cell.playing-2, .sc-cell.played-1, .sc-cell.played-2').forEach(cell => {
+            cell.classList.remove('playing-1', 'playing-2', 'played-1', 'played-2');
+          });
+        }
+      });
+      scCurIdx = curIdx;
+    }
+    // 垂直滚动:当前块所在行滚到可见区中间(4 排可见,每排 5 块,往下排走)
+    if (curIdx >= 0 && scBlocks[curIdx]) {
+      const blockEl = scBlocks[curIdx].element;
+      const wrapH = wrap.clientHeight;
+      const centerOffset = wrapH / 2;
+      const blockCenter = blockEl.offsetTop + blockEl.offsetHeight / 2;
+      const targetY = centerOffset - blockCenter;
+      const maxScroll = Math.max(0, grid.scrollHeight - wrapH);
+      grid.style.transform = 'translateY(' + clamp(targetY, -maxScroll, 0) + 'px)';
+    } else {
+      grid.style.transform = 'translateY(0)';
+    }
   }
 
   // ---------- 构建高亮序列(按时间分组,相邻组颜色不同,同组同色) ----------
@@ -527,6 +927,28 @@
     for (let c = 0; c < COLORS; c++) el.classList.remove('pending-' + c);
   }
 
+  // 下一个音符提示:键上角标显示剩余毫秒(ms 为 null 时隐藏)
+  function setNextBadge(el, ms) {
+    if (!el) return;
+    let b = el.querySelector('.next-badge');
+    if (!b) {
+      b = document.createElement('span');
+      b.className = 'next-badge';
+      el.appendChild(b);
+    }
+    if (ms == null) {
+      b.style.display = 'none';
+    } else {
+      b.textContent = String(Math.max(0, Math.ceil(ms)));
+      b.style.display = 'flex';
+    }
+  }
+  function clearNext(el) {
+    if (!el) return;
+    el.classList.remove('next');
+    setNextBadge(el, null);
+  }
+
   // ---------- 高亮动画 ----------
   function currentTimeMs() {
     return (performance.now() - startClock) * speed;
@@ -535,27 +957,42 @@
   function tick(now) {
     if (!active) return;
     const t = currentTimeMs();
+    // 第一遍:找出所有待弹音符中时间最近的时刻 nextTime(和弦=同时刻整组)
+    let nextTime = Infinity;
+    for (let idx = 0; idx < TOTAL; idx++) {
+      const n = keyQueue[idx][curPtr[idx]];
+      if (!n || n.hit) continue;
+      const d = t - n.time;
+      if (d >= -leadMs && d <= MISS_WINDOW && n.time < nextTime) nextTime = n.time;
+    }
+    // 第二遍:渲染每个键的预备/下一个状态
     for (let idx = 0; idx < TOTAL; idx++) {
       const q = keyQueue[idx];
       const n = q[curPtr[idx]];
       const el = keyEl(idx);
       if (!n) {                      // 该键没有待弹音符
-        if (el) { el.classList.remove('pending'); clearPendingColor(el); }
+        if (el) { el.classList.remove('pending'); clearPendingColor(el); clearNext(el); }
         continue;
       }
       const d = t - n.time;
       if (d < -leadMs) {             // 未到提前量,不亮
         el.classList.remove('pending');
         clearPendingColor(el);
+        clearNext(el);
       } else if (d <= MISS_WINDOW) { // 提前期 + 到时刻后判定窗口内:持续高亮等待按键
         el.classList.add('pending');
         setPendingColor(el, n.color);
+        const isNext = (Math.abs(n.time - nextTime) < 0.5);
+        el.classList.toggle('next', isNext);
+        if (isNext) setNextBadge(el, -d);   // 剩余毫秒倒计时
+        else setNextBadge(el, null);
       } else {                       // 超时未按 → Miss
         missKey(idx, el, n);
       }
     }
-    const pct = endT ? Math.min(100, Math.round(t / endT * 100)) : 0;
+    const pct = endT ? Math.max(0, Math.min(100, Math.round(t / endT * 100))) : 0;
     $('progressFill').style.width = pct + '%';
+    updateScroll(t);
   }
 
   // ---------- 判定 ----------
@@ -563,6 +1000,7 @@
     stats.ok++;
     el.classList.remove('pending', 'wrong', 'miss');
     clearPendingColor(el);
+    clearNext(el);
     el.classList.add('hit');
     setTimeout(() => el.classList.remove('hit'), 300);
     updateStats();
@@ -574,6 +1012,7 @@
     stats.bad++;
     el.classList.remove('pending');
     clearPendingColor(el);
+    clearNext(el);
     el.classList.add('miss');
     setTimeout(() => el.classList.remove('miss'), 400);
     updateStats();
@@ -583,6 +1022,7 @@
     stats.bad++;
     el.classList.remove('pending', 'hit', 'miss');
     clearPendingColor(el);
+    clearNext(el);
     el.classList.add('wrong');
     setTimeout(() => el.classList.remove('wrong'), 260);
     updateStats();
@@ -612,11 +1052,15 @@
     keyQueue.forEach(q => { if (q.length) endT = Math.max(endT, q[q.length - 1].time); });
     stats = { ok: 0, bad: 0 };
     active = true;
-    startClock = performance.now();
+    // 倒计时开始的话 startClock 已在 beginCountdown 设为倒计时结束时刻(时间轴无缝衔接);
+    // 直接开始(无倒计时)时 startClock 为 0,才从现在起算
+    if (!startClock) startClock = performance.now();
+    if (timerId) clearInterval(timerId);
     for (let i = 0; i < TOTAL; i++) {
       const el = keyEl(i);
       el.classList.remove('pending', 'hit', 'wrong', 'miss');
       clearPendingColor(el);
+      clearNext(el);
     }
     $('startBtn').textContent = '停止';
     $('startBtn').classList.add('stop');
@@ -634,6 +1078,12 @@
     if (keyQueue.every(q => q.length === 0)) { setStatus('无有效音符'); return; }
     if (countdownMs <= 0) { doStart(); return; }
     countdownUntil = performance.now() + countdownMs;
+    // 把时钟基准设为倒计时结束时刻:倒计时期间 tick 就按提前量亮起第一个音并滚动谱面,
+    // 倒计时一结束第一个音正好到达判定线,速度快也不至于来不及反应
+    startClock = countdownUntil;
+    active = true;
+    if (timerId) clearInterval(timerId);
+    timerId = setInterval(tick, 16);
     $('startBtn').classList.add('stop');
     $('startBtn').title = '倒计时中,点击取消';
     countdownTimer = setInterval(() => {
@@ -657,10 +1107,12 @@
     if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = 0; }
     active = false;
     if (timerId) clearInterval(timerId);
+    startClock = 0;
     for (let i = 0; i < TOTAL; i++) {
       const el = keyEl(i);
       el.classList.remove('pending', 'hit', 'wrong', 'miss');
       clearPendingColor(el);
+      clearNext(el);
     }
     keyQueue = [];
     curPtr = [];
@@ -669,6 +1121,7 @@
     $('startBtn').title = 'F11 开始/停止跟弹';
     setStatus('已停止');
     updateStats();
+    updateScroll(0);
   }
 
   // ---------- 调整模式(拖动琴键区微调对齐游戏按键) ----------
@@ -708,7 +1161,7 @@
   // 渲染层仅在上报"整窗可交互"状态(换曲面板打开/调整模式)时通知主进程
   let songPanelOpen = false;
   function updateInteractive() {
-    api.setInteractive(adjustMode || songPanelOpen);
+    api.setInteractive(adjustMode || songPanelOpen || scrollAdjustMode);
   }
 
   // ---------- 事件绑定 ----------
@@ -723,9 +1176,11 @@
     api.hide();
   });
   $('adjustBtn').addEventListener('click', () => setAdjustMode(!adjustMode));
+  $('scrollBtn').addEventListener('click', () => setScrollAdjustMode(!scrollAdjustMode));
   $('captureBtn').addEventListener('click', () => {
-    // 截图对齐前退出微调模式,避免鼠标穿透干扰
+    // 截图对齐前退出微调/谱面调整模式,避免鼠标穿透干扰
     if (adjustMode) setAdjustMode(false);
+    if (scrollAdjustMode) setScrollAdjustMode(false);
     api.capture();
   });
 
@@ -873,6 +1328,8 @@
     countdownMs = Math.round(v * 1000);
     cdInput.value = v.toFixed(v % 1 ? 1 : 0);
     saveCountdown();
+    // 空白预滚块数量跟随倒计时时长,重新生成谱面
+    buildScroll();
     showToast('倒计时设为 ' + cdInput.value + ' 秒');
   });
 
@@ -896,6 +1353,7 @@
     $('songName').title = (payload.name || '') + ((payload.author) ? ' · ' + payload.author : '');
     renderKeys();
     stop();
+    buildScroll();
   });
 
   api.onKey((idx) => handleKey(idx));
@@ -914,9 +1372,20 @@
 
   // 初始渲染
   loadKeysState();
+  loadScrollPos();
+  applyScrollPos();
+  loadScrollScale();
+  applyScrollScale();
+  loadScrollRows();
+  applyScrollRows();
   renderKeys();
+  buildScroll();
   renderLead();
   renderSpeed();
+  // 窗口缩放时重新计算谱面行列定位
+  window.addEventListener('resize', () => {
+    if (scBlocks.length) updateScroll(currentTimeMs());
+  });
 })();
 </script>
 </body>

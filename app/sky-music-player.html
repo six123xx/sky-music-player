@@ -173,6 +173,38 @@
   }
   .error-msg.active, .info-msg.active { display: block; }
 
+  /* ════════════ Desktop-version banner ════════════ */
+  .desktop-banner {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin: 0 0 16px;
+    padding: 12px 16px;
+    border-radius: var(--r-md);
+    background: linear-gradient(90deg, rgba(255, 180, 60, 0.14), rgba(255, 120, 160, 0.10));
+    border: 1px solid rgba(255, 170, 70, 0.35);
+    color: var(--text-1);
+    font-size: 0.88em;
+  }
+  .desktop-banner.active { display: flex; }
+  .desktop-banner .db-icon { font-size: 1.4em; line-height: 1; flex-shrink: 0; }
+  .desktop-banner .db-body { flex: 1; min-width: 0; }
+  .desktop-banner .db-title { font-weight: 700; margin-bottom: 2px; }
+  .desktop-banner .db-desc { color: var(--text-2); font-size: 0.86em; }
+  .desktop-banner .db-close {
+    flex-shrink: 0;
+    width: 24px; height: 24px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-2);
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 1;
+  }
+  .desktop-banner .db-close:hover { background: rgba(255, 255, 255, 0.18); color: var(--text-1); }
+
   /* ════════════ Upload Area ════════════ */
   .upload-area {
     border: 2px dashed var(--border);
@@ -1988,6 +2020,16 @@
 </nav>
 
 <div class="container">
+  <!-- Desktop-version banner (browser only) -->
+  <div class="desktop-banner" id="desktopBanner">
+    <span class="db-icon">🖥️</span>
+    <div class="db-body">
+      <div class="db-title">提示：建议使用桌面版应用</div>
+      <div class="db-desc">桌面版支持跟弹悬浮窗（跟随琴键提示）等完整体验，当前浏览器模式部分功能不可用。</div>
+    </div>
+    <button class="db-close" id="desktopBannerClose" title="关闭">✕</button>
+  </div>
+
   <!-- Messages -->
   <div class="error-msg" id="errorMsg"></div>
   <div class="info-msg" id="infoMsg">成功加载 1 首乐谱</div>
@@ -5146,6 +5188,23 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   });
+
+  // 桌面版提示横幅:仅在浏览器(非桌面版)中显示,用户可关闭(本地记忆)
+  (function initDesktopBanner() {
+    const isDesktop = !!window.desktopAPI;
+    const banner = document.getElementById('desktopBanner');
+    const closeBtn = document.getElementById('desktopBannerClose');
+    if (!banner || !closeBtn) return;
+    if (isDesktop) return;                 // 桌面版不显示
+    try {
+      if (localStorage.getItem('desktopBannerClosed') === '1') return;
+    } catch (e) { /* ignore */ }
+    banner.classList.add('active');
+    closeBtn.addEventListener('click', () => {
+      banner.classList.remove('active');
+      try { localStorage.setItem('desktopBannerClosed', '1'); } catch (e) { /* ignore */ }
+    });
+  })();
 
   // 跟弹悬浮窗(桌面模式):把当前乐谱与键位发给主进程,打开透明置顶悬浮窗
   window.openPracticeOverlay = function openPracticeOverlay() {
