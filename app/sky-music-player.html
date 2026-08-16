@@ -5353,6 +5353,7 @@ document.addEventListener('DOMContentLoaded', function() {
         keyMap: state.keyMap || {},
         keyLabels: state.keyLabels || [],
         pitchLevel: state.userPitchLevel !== 0 ? state.userPitchLevel : songPl,
+        speed: state.playbackSpeed || 1, // 速度档影响下落快慢
       });
     });
   }

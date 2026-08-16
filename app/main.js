@@ -1,5 +1,6 @@
 // Electron 主进程:启动内置服务器、创建应用窗口、管理跟弹透明悬浮窗
 const { app, BrowserWindow, shell, dialog, ipcMain, screen } = require('electron');
+const fs = require('fs');
 const path = require('path');
 const { createServer } = require('./server');
 const koffi = require('koffi');
@@ -77,23 +78,57 @@ function closeOverlay() {
   pressedCodes.clear();
 }
 
+// 悬浮窗位置/大小记忆:保存到用户数据目录,便于下次对齐游戏琴键
+const overlayStateFile = () => path.join(app.getPath('userData'), 'overlay-state.json');
+function loadOverlayState() {
+  try { return JSON.parse(fs.readFileSync(overlayStateFile(), 'utf8')); } catch (e) { return {}; }
+}
+function saveOverlayState(state) {
+  try { fs.writeFileSync(overlayStateFile(), JSON.stringify(state)); } catch (e) {}
+}
+
+// 调整模式:true=整个窗口可交互(拖动边缘调整大小/拖动移动), false=正常穿透模式
+function setOverlayAdjustMode(flag) {
+  if (!overlayWindow || overlayWindow.isDestroyed()) return;
+  overlayWindow.setIgnoreMouseEvents(!flag, { forward: true });
+  if (flag) {
+    // 进入调整模式:确保窗口可聚焦以接收拖拽边缘事件
+    overlayWindow.setFocusable(true);
+    overlayWindow.focus();
+  } else {
+    overlayWindow.setFocusable(false);
+  }
+  try { overlayWindow.webContents.send('overlay:adjust-mode', !!flag); } catch (e) {}
+}
+
 function createOverlay() {
   if (overlayWindow && !overlayWindow.isDestroyed()) return overlayWindow;
   const wa = screen.getPrimaryDisplay().workArea;
-  const W = 300;
-  const H = 154;
+  const state = loadOverlayState();
+  const W = 320;
+  const H = 168;
+  let x = wa.x + wa.width - W - 20;
+  let y = wa.y + wa.height - H - 20;
+  if (state.bounds && Number.isFinite(state.bounds.x)) {
+    x = Math.round(state.bounds.x);
+    y = Math.round(state.bounds.y);
+    if (state.bounds.width > 0) state.bounds.width = Math.round(state.bounds.width);
+    if (state.bounds.height > 0) state.bounds.height = Math.round(state.bounds.height);
+  }
   overlayWindow = new BrowserWindow({
-    width: W,
-    height: H,
-    x: wa.x + wa.width - W - 20,
-    y: wa.y + wa.height - H - 20,
+    width: (state.bounds && state.bounds.width > 0) ? state.bounds.width : W,
+    height: (state.bounds && state.bounds.height > 0) ? state.bounds.height : H,
+    x: x,
+    y: y,
+    minWidth: 260,
+    minHeight: 120,
     transparent: true,
     frame: false,
-    resizable: false,
+    resizable: true, // 可调整大小以对齐游戏琴键
     alwaysOnTop: true,
     skipTaskbar: true,
     hasShadow: false,
-    focusable: false, // 不抢游戏焦点
+    focusable: false, // 不抢游戏焦点(调整模式临时开启)
     webPreferences: {
       preload: path.join(__dirname, 'preload-overlay.js'),
       contextIsolation: true,
@@ -109,6 +144,17 @@ function createOverlay() {
     overlayWindow = null;
     pressedCodes.clear();
   });
+  // 记忆窗口位置与大小(松手后保存)
+  let persistTimer = null;
+  const persistBounds = () => {
+    if (persistTimer) clearTimeout(persistTimer);
+    persistTimer = setTimeout(() => {
+      if (!overlayWindow || overlayWindow.isDestroyed()) return;
+      saveOverlayState({ bounds: overlayWindow.getBounds() });
+    }, 400);
+  };
+  overlayWindow.on('moved', persistBounds);
+  overlayWindow.on('resized', persistBounds);
   startKeyPolling();
   return overlayWindow;
 }
@@ -178,6 +224,11 @@ ipcMain.on('overlay:set-interactive', (_e, flag) => {
   if (overlayWindow && !overlayWindow.isDestroyed()) {
     overlayWindow.setIgnoreMouseEvents(!flag, { forward: true });
   }
+});
+
+// 调整模式:开启后整个窗口可交互,便于拖动边缘调整大小对齐游戏琴键
+ipcMain.on('overlay:set-adjust-mode', (_e, flag) => {
+  setOverlayAdjustMode(!!flag);
 });
 
 // ---------- 生命周期 ----------
