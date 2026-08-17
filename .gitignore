@@ -7,6 +7,11 @@ release2/
 dist/
 out/
 
+# 临时调试/凭据文件
+token.txt
+curl-test.json
+*.log
+
 # logs & misc
 *.log
 .DS_Store
