@@ -79,15 +79,16 @@ async function api(url, options = {}) {
     console.log('Release v1.0.0 已存在，复用 id=' + release.id);
   }
 
-  // 上传资产
-  const dir = path.join(__dirname, 'release');
+  // 上传资产(优先读取最新构建目录 release2,避免与旧 release 目录混淆)
+  const dir = path.join(__dirname, 'release2');
   const files = ['SkyMusicPlayer-Setup-1.0.0.exe', 'SkyMusicPlayer-Portable-1.0.0.exe'];
   for (const f of files) {
     const p = path.join(dir, f);
     if (!fs.existsSync(p)) { console.log('跳过（不存在）: ' + f); continue; }
     const stat = fs.statSync(p);
     const data = fs.readFileSync(p);
-    const url = `${apiBase}/releases/${release.id}/assets?name=${encodeURIComponent(f)}`;
+    // asset 上传必须走 uploads.github.com 主机;api.github.com 会 301 重定向且跨主机丢 Authorization 头导致 404
+    const url = `https://uploads.github.com/repos/${repo}/releases/${release.id}/assets?name=${encodeURIComponent(f)}`;
     try {
       const res = await fetch(url, {
         method: 'POST',

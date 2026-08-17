@@ -124,8 +124,16 @@
     background: rgba(12, 18, 32, 0.85);
   }
   .key-row { display: flex; gap: 8px; flex: 1; }
-  /* 截图对齐模式:琴键按绝对坐标精确定位(覆盖游戏按键) */
-  .keys.aligned { display: block; gap: 0; padding: 0; background: transparent; border-color: transparent; }
+  /* 截图对齐模式:琴键按绝对坐标精确定位(覆盖游戏按键)
+     必须让 .keys 的定位原点与窗口原点重合,否则 key 的 left/top 会整体偏移 */
+  .keys.aligned {
+    display: block;
+    top: 0; left: 0; right: 0; bottom: 0;
+    width: 100%; margin: 0;
+    gap: 0; padding: 0;
+    background: transparent;
+    border-color: transparent;
+  }
   .keys.aligned .key {
     position: absolute;
     display: flex;

@@ -3,6 +3,7 @@ node_modules/
 
 # build output
 release/
+release2/
 dist/
 out/
 

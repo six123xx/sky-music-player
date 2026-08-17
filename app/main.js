@@ -152,7 +152,10 @@ function unregisterOverlayShortcuts() {
 // ---------- 截图对齐窗口(截全屏→标记 3 个琴键点→生成 15 键绝对坐标) ----------
 function startCapture() {
   if (captureWindow && !captureWindow.isDestroyed()) return;
-  const size = screen.getPrimaryDisplay().size;
+  const disp = screen.getPrimaryDisplay();
+  // 窗口尺寸用 DIP(disp.size),截图 thumbnail 也按 disp.size 请求,
+  // 两者同为 DIP 像素,1:1 显示,标记点 clientX/clientY 与 overlay bounds 直接对齐。
+  const size = { width: disp.size.width, height: disp.size.height };
   captureWindow = new BrowserWindow({
     x: 0,
     y: 0,
@@ -174,7 +177,7 @@ function startCapture() {
 
   desktopCapturer.getSources({
     types: ['screen'],
-    thumbnailSize: { width: size.width, height: size.height }
+    thumbnailSize: { width: disp.size.width, height: disp.size.height }
   }).then((sources) => {
     if (!captureWindow || captureWindow.isDestroyed() || !sources.length) return;
     const dataUrl = sources[0].thumbnail.toDataURL();
@@ -224,6 +227,8 @@ function registerIpc() {
   ipcMain.on('overlay:capture-done', (e, { points } = {}) => {
     if (captureWindow) { captureWindow.close(); captureWindow = null; }
     if (!overlayWindow || overlayWindow.isDestroyed() || !points || points.length < 3) return;
+    // 标记点坐标来自截图:截图按 disp.size(DIP) 请求且 1:1 显示在 capture 窗口,
+    // 因此 clientX/clientY 与 overlayWindow.getBounds() 同属 DIP 坐标系,直接相减即可。
     const p0 = points[0], p1 = points[1], p2 = points[2];
     const cw = (p1.x - p0.x) / 4;
     const rh = (p2.y - p0.y) / 2;
