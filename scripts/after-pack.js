@@ -53,8 +53,8 @@ exports.default = async function (context) {
     '--set-version-string', 'FileDescription', 'Sky Music Player Desktop',
     '--set-version-string', 'CompanyName', 'SkyMusicPlayer',
     '--set-version-string', 'LegalCopyright', 'MIT License',
-    '--set-file-version', '1.0.0',
-    '--set-product-version', '1.0.0'
+    '--set-file-version', '0.3.0',
+    '--set-product-version', '0.3.0'
   ];
   execFileSync(rcedit, args, { stdio: 'inherit' });
   console.log('[afterPack] icon & version injected ->', exePath);

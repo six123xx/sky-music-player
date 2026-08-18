@@ -2,7 +2,7 @@
 <html lang="zh-CN" data-theme="light" class="" style="--bg-0: #0a0a0a; --bg-1: #141414; --bg-2: #1e1e1e; --bg-3: #282828; --bg-player: #161616; --accent: #e8e8e8; --accent-soft: #b0b0b0; --accent-glow: rgba(232,232,232,0.30); --accent-gold: #888888; --gold-soft: #666666; --gold-glow: rgba(136,136,136,0.30); --text: #f5f5f5; --text-dim: #999999; --text-faint: #555555; --card: rgba(40,40,40,0.55); --card-hover: rgba(50,50,50,0.65); --border: rgba(255,255,255,0.10); --border-hover: rgba(255,255,255,0.25);"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>光遇乐谱播放器 | Sky Music Player</title>
+<title>SKY弹琴助手</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -52,6 +52,9 @@
     --t-fast: 150ms ease;
     --t-normal: 250ms ease;
     --t-slow: 400ms ease;
+
+    /* ── Window chrome ── */
+    --titlebar-h: 40px;
   }
 
   body {
@@ -60,9 +63,74 @@
     color: var(--text);
     min-height: 100vh;
     overflow-x: hidden;
+    padding-top: var(--titlebar-h);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+
+  /* 隐藏滚动条(保留滚轮滚动能力) */
+  *::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+  html, body {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  /* ════════════ Window titlebar (自绘,替代系统边框) ════════════ */
+  .titlebar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: var(--titlebar-h);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px 0 16px;
+    background: rgba(10, 10, 10, 0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    z-index: 200;
+    -webkit-app-region: drag;
+    user-select: none;
+  }
+  .titlebar-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.82em;
+    font-weight: 600;
+    color: var(--text-dim);
+    letter-spacing: 0.4px;
+    pointer-events: none;
+  }
+  .titlebar-title .tb-icon { width: 18px; height: 18px; object-fit: contain; border-radius: 4px; display: inline-block; vertical-align: middle; margin-top: -2px; }
+  .win-controls {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    -webkit-app-region: no-drag;
+  }
+  .win-btn {
+    width: 42px;
+    height: 30px;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    font-size: 0.85em;
+    line-height: 1;
+    cursor: pointer;
+    border-radius: var(--r-sm);
+    transition: all var(--t-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .win-btn:hover { background: rgba(255,255,255,0.10); color: var(--text); }
+  .win-btn.win-close:hover { background: var(--danger); color: #fff; }
+  .win-btn svg { width: 12px; height: 12px; stroke: currentColor; stroke-width: 1.6; fill: none; stroke-linecap: round; }
 
   #starfield {
     position: fixed;
@@ -76,55 +144,37 @@
     position: relative;
     z-index: 1;
     max-width: 1080px;
-    margin: 0 auto;
+    margin: 0 0 0 180px;
     padding: 24px 20px 40px;
   }
 
   /* ════════════ Navbar ════════════ */
   .navbar {
+    position: fixed;
+    left: 0; top: var(--titlebar-h); bottom: 0;
+    width: 180px;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 28px;
-    height: 60px;
-    background: rgba(10, 10, 10, 0.82);
+    flex-direction: column;
+    align-items: stretch;
+    padding: 22px 14px 20px;
+    background: rgba(10, 10, 10, 0.9);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 0;
+    border-right: 1px solid var(--border);
     z-index: 100;
-  }
-  .nav-logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 1.05em;
-    font-weight: 700;
-    cursor: pointer;
-    white-space: nowrap;
-    letter-spacing: 0.3px;
-  }
-  .nav-logo .logo-icon {
-    background: linear-gradient(135deg, var(--accent), var(--accent-gold));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    font-size: 1.4em;
-  }
-  .nav-logo .logo-text {
-    background: linear-gradient(135deg, var(--accent), var(--accent-gold));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    -webkit-app-region: drag;
+    user-select: none;
   }
   .nav-items {
     display: flex;
-    align-items: center;
-    gap: 2px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
   }
   .nav-item {
-    padding: 7px 18px;
+    padding: 10px 14px;
+    width: 100%;
+    text-align: left;
     border: none;
     background: transparent;
     color: var(--text-dim);
@@ -134,6 +184,7 @@
     border-radius: var(--r-sm);
     transition: all var(--t-normal);
     white-space: nowrap;
+    -webkit-app-region: no-drag;
   }
   .nav-item:hover {
     color: var(--text);
@@ -142,6 +193,11 @@
   .nav-item.active {
     color: var(--accent);
     background: rgba(232, 232, 232, 0.10);
+  }
+  .nav-drag {
+    flex: 1;
+    min-height: 32px;
+    -webkit-app-region: drag;
   }
 
   /* ════════════ Pages ════════════ */
@@ -162,9 +218,9 @@
     font-weight: 500;
   }
   .error-msg {
-    background: var(--danger-bg);
-    border: 1px solid rgba(208, 80, 80, 0.28);
-    color: var(--danger);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-hover);
+    color: var(--text);
   }
   .info-msg {
     background: rgba(232, 232, 232, 0.07);
@@ -182,8 +238,8 @@
     margin: 0 0 16px;
     padding: 12px 16px;
     border-radius: var(--r-md);
-    background: linear-gradient(90deg, rgba(255, 180, 60, 0.14), rgba(255, 120, 160, 0.10));
-    border: 1px solid rgba(255, 170, 70, 0.35);
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+    border: 1px solid var(--border-hover);
     color: var(--text-1);
     font-size: 0.88em;
   }
@@ -1047,14 +1103,14 @@
     transform: scale(0.95);
   }
   .composer-keyboard .note-btn.beat-active {
-    background: #ffc850;
-    color: #1a1a2e;
-    box-shadow: 0 0 16px rgba(255,200,80,0.7);
-    border-color: #ffc850;
+    background: #ffffff;
+    color: #0a0a0a;
+    box-shadow: 0 0 16px rgba(255,255,255,0.7);
+    border-color: #ffffff;
     transform: scale(1.05);
   }
   .composer-keyboard .note-btn.beat-active .diamond {
-    border-color: #fff;
+    border-color: #0a0a0a;
   }
 
   .composer-modal-overlay {
@@ -1118,6 +1174,103 @@
   .composer-modal-close {
     align-self: center;
     margin-top: 4px;
+  }
+
+  /* 通用输入/确认弹窗（Electron 不支持 window.prompt/confirm） */
+  .ui-modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.6);
+    z-index: 10001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .ui-modal {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    padding: 22px;
+    width: 360px;
+    max-width: 92%;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  }
+  .ui-modal h3 {
+    margin: 0;
+    font-size: 1em;
+    text-align: center;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+  .ui-modal-msg {
+    margin: 0;
+    font-size: 0.85em;
+    color: var(--text-dim);
+    text-align: center;
+    line-height: 1.6;
+    word-break: break-all;
+    white-space: pre-wrap;
+  }
+  .ui-modal-input {
+    padding: 10px 12px;
+    border-radius: var(--r-sm);
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    font-size: 0.9em;
+    outline: none;
+  }
+  .ui-modal-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-glow);
+  }
+  .ui-modal-select {
+    padding: 10px 12px;
+    border-radius: var(--r-sm);
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    font-size: 0.9em;
+    outline: none;
+    cursor: pointer;
+  }
+  .ui-modal-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-glow);
+  }
+  .ui-modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+  .ui-modal-btn {
+    padding: 9px 20px;
+    min-width: 96px;
+    border-radius: var(--r-md);
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 0.85em;
+    transition: all var(--t-fast);
+  }
+  .ui-modal-btn:hover { border-color: var(--accent); }
+  .ui-modal-ok {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2, var(--accent)));
+    border-color: transparent;
+    color: #1a1205;
+    font-weight: 600;
+  }
+  .ui-modal-danger {
+    background: linear-gradient(135deg, #e05a5a, #c0392b);
+    border-color: transparent;
+    color: #fff;
+    font-weight: 600;
   }
 
   .composer-editor {
@@ -1221,22 +1374,7 @@
     align-items: center;
   }
 
-  /* ════════════ Format Info ════════════ */
-  .format-info {
-    text-align: center;
-    padding: 16px;
-    color: var(--text-dim);
-    font-size: 0.78em;
-    line-height: 1.8;
-  }
-  .format-info code {
-    background: rgba(255,255,255,0.06);
-    padding: 2px 7px;
-    border-radius: 4px;
-    color: var(--accent);
-    font-family: var(--font-mono);
-    font-size: 0.95em;
-  }
+
 
   /* ════════════ Library ════════════ */
   .library { padding: 20px 0; }
@@ -1282,17 +1420,33 @@
   }
   .lib-clear-btn {
     padding: 10px 16px;
-    background: var(--danger-bg);
-    border: 1px solid rgba(208, 80, 80, 0.28);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-hover);
     border-radius: var(--r-md);
-    color: var(--danger);
+    color: var(--text);
     font-size: 0.85em;
     font-weight: 500;
     cursor: pointer;
     transition: all var(--t-fast);
     white-space: nowrap;
   }
-  .lib-clear-btn:hover { background: rgba(208, 80, 80, 0.18); }
+  .lib-clear-btn:hover { background: rgba(255, 255, 255, 0.12); }
+  .lib-folder-btn {
+    padding: 10px 16px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+    border: 1px solid var(--accent-soft);
+    border-radius: var(--r-md);
+    color: var(--text);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--t-fast);
+    white-space: nowrap;
+  }
+  .lib-folder-btn:hover {
+    transform: translateY(-1px);
+    border-color: var(--accent);
+    box-shadow: 0 4px 14px var(--accent-glow);
+  }
 
   .lib-cat-bar {
     display: flex;
@@ -1322,6 +1476,13 @@
     color: var(--accent);
     border-color: var(--accent);
     background: rgba(232, 232, 232, 0.1);
+  }
+  .lib-cat-chip.drag-over {
+    color: #fff;
+    border-color: var(--accent);
+    background: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+    transform: scale(1.06);
   }
   .lib-cat-chip .cat-count {
     font-size: 0.75em;
@@ -1386,6 +1547,11 @@
     transform: translateY(-3px);
     box-shadow: 0 8px 24px rgba(0,0,0,0.35);
   }
+  .lib-card.dragging {
+    opacity: 0.5;
+    border-style: dashed;
+    border-color: var(--accent);
+  }
   .lib-card .card-icon {
     width: 46px; height: 46px;
     border-radius: var(--r-sm);
@@ -1427,9 +1593,9 @@
     top: 12px; right: 12px;
     width: 26px; height: 26px;
     border-radius: 50%;
-    border: none;
-    background: var(--danger-bg);
-    color: var(--danger);
+    border: 1px solid var(--border-hover);
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-dim);
     font-size: 0.75em;
     cursor: pointer;
     display: flex;
@@ -1439,7 +1605,7 @@
     transition: all var(--t-fast);
   }
   .lib-card:hover .card-delete { opacity: 1; }
-  .lib-card .card-delete:hover { background: rgba(208, 80, 80, 0.28); }
+  .lib-card .card-delete:hover { background: rgba(255, 255, 255, 0.18); color: var(--text); }
   .lib-card .card-share {
     position: absolute;
     top: 8px;
@@ -1617,8 +1783,8 @@
     transition: border-color 0.2s, background 0.2s;
   }
   .decrypt-upload:hover {
-    border-color: var(--gold);
-    background: rgba(255,215,0,0.05);
+    border-color: var(--border-hover);
+    background: rgba(255,255,255,0.04);
   }
   .decrypt-upload .upload-icon {
     font-size: 2em;
@@ -1648,8 +1814,8 @@
   .decrypt-btn {
     margin-top: 10px;
     padding: 10px 32px;
-    background: var(--gold);
-    color: #000;
+    background: var(--accent);
+    color: var(--bg-0);
     border: none;
     border-radius: 10px;
     font-size: 1em;
@@ -1712,32 +1878,32 @@
     transition: all 0.2s;
   }
   .decrypt-action-btn:hover {
-    border-color: var(--gold);
-    color: var(--gold);
+    border-color: var(--border-hover);
+    color: var(--text);
   }
   .decrypt-action-btn.load {
-    background: var(--gold);
-    color: #000;
-    border-color: var(--gold);
+    background: var(--accent);
+    color: var(--bg-0);
+    border-color: var(--accent);
     font-weight: 600;
   }
-  .decrypt-action-btn.load:hover { color: #000; opacity: 0.9; }
+  .decrypt-action-btn.load:hover { color: var(--bg-0); opacity: 0.9; }
   #decryptError {
     margin-top: 14px;
     padding: 10px 14px;
-    background: rgba(255,80,80,0.1);
-    border: 1px solid rgba(255,80,80,0.3);
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border-hover);
     border-radius: 8px;
-    color: #ff6b6b;
+    color: var(--text);
     font-size: 0.85em;
   }
   #decryptInfo {
     margin-top: 14px;
     padding: 10px 14px;
-    background: rgba(80,255,120,0.08);
-    border: 1px solid rgba(80,255,120,0.2);
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
     border-radius: 8px;
-    color: #6bcf7f;
+    color: var(--text-dim);
     font-size: 0.85em;
   }
 
@@ -1767,8 +1933,8 @@
     transition: border-color 0.2s, background 0.2s;
   }
   .jianpu-upload:hover {
-    border-color: var(--gold);
-    background: rgba(255,215,0,0.05);
+    border-color: var(--border-hover);
+    background: rgba(255,255,255,0.04);
   }
   .jianpu-upload .upload-icon {
     font-size: 2em;
@@ -1798,8 +1964,8 @@
   .jianpu-btn {
     margin-top: 10px;
     padding: 10px 32px;
-    background: var(--gold);
-    color: #000;
+    background: var(--accent);
+    color: var(--bg-0);
     border: none;
     border-radius: 10px;
     font-size: 1em;
@@ -1812,19 +1978,19 @@
   #jianpuError {
     margin-top: 14px;
     padding: 10px 14px;
-    background: rgba(255,80,80,0.1);
-    border: 1px solid rgba(255,80,80,0.3);
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border-hover);
     border-radius: 8px;
-    color: #ff6b6b;
+    color: var(--text);
     font-size: 0.85em;
   }
   #jianpuInfo {
     margin-top: 14px;
     padding: 10px 14px;
-    background: rgba(80,255,120,0.08);
-    border: 1px solid rgba(80,255,120,0.2);
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
     border-radius: 8px;
-    color: #6bcf7f;
+    color: var(--text-dim);
     font-size: 0.85em;
   }
   .jianpu-toolbar {
@@ -1844,8 +2010,8 @@
     transition: all 0.2s;
   }
   .jianpu-action-btn:hover {
-    border-color: var(--gold);
-    color: var(--gold);
+    border-color: var(--border-hover);
+    color: var(--text);
   }
   .jianpu-canvas-wrap {
     background: #fff;
@@ -1883,6 +2049,45 @@
     color: var(--text-dim);
     margin-bottom: 16px;
     line-height: 1.6;
+  }
+
+  .settings-section code {
+    background: rgba(255,255,255,0.06);
+    padding: 2px 7px;
+    border-radius: 4px;
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 0.92em;
+    word-break: break-all;
+  }
+  .settings-section .speed-row {
+    margin-top: 6px;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+  .settings-section .selector-row {
+    margin-top: 14px;
+  }
+  .settings-section .selector-label {
+    text-align: left;
+    font-size: 0.78em;
+  }
+  .settings-section .selector-btns {
+    justify-content: flex-start;
+  }
+  .settings-format-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 10px;
+    font-size: 0.86em;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+  .settings-format-list strong {
+    color: var(--text);
+    font-weight: 600;
   }
 
   /* Toggle switch */
@@ -1990,9 +2195,9 @@
     .note-grid { gap: 6px; }
     .viz-section { min-height: 0; }
     .grid-scroll-wrap { height: 180px; }
-    .navbar { padding: 0 14px; height: 52px; }
-    .nav-logo { font-size: 0.95em; }
-    .nav-item { padding: 5px 12px; font-size: 0.8em; }
+    .navbar { width: 62px; padding: 18px 8px; }
+    .nav-item { padding: 10px 6px; font-size: 0.78em; text-align: center; }
+    .container { margin-left: 62px; }
     .library-grid { grid-template-columns: 1fr; }
   }
 </style>
@@ -2001,12 +2206,21 @@
 
 <canvas id="starfield" width="1214" height="990"></canvas>
 
+<!-- 自绘标题栏(透明无边框窗口:拖拽 + 最小化/关闭) -->
+<div class="titlebar">
+  <div class="titlebar-title"><img src="icon.png" class="tb-icon" alt="">SKY弹琴助手</div>
+  <div class="win-controls">
+    <button class="win-btn" onclick="minimizeWindow()" title="最小化" aria-label="最小化">
+      <svg viewBox="0 0 12 12"><line x1="1.5" y1="6" x2="10.5" y2="6"/></svg>
+    </button>
+    <button class="win-btn win-close" onclick="closeWindow()" title="关闭" aria-label="关闭">
+      <svg viewBox="0 0 12 12"><line x1="2" y1="2" x2="10" y2="10"/><line x1="10" y1="2" x2="2" y2="10"/></svg>
+    </button>
+  </div>
+</div>
+
 <!-- Navbar -->
 <nav class="navbar">
-  <div class="nav-logo" onclick="switchPage('player')">
-    <span class="logo-icon">♫</span>
-    <span class="logo-text">光遇乐谱播放器</span>
-  </div>
   <div class="nav-items">
     <button class="nav-item" data-page="practice" onclick="openPracticeOverlay()">跟弹</button>
     <button class="nav-item active" data-page="player" onclick="switchPage('player')">播放器</button>
@@ -2017,6 +2231,7 @@
     <button class="nav-item" data-page="about" onclick="switchPage('about')">关于</button>
     <button class="nav-item" data-page="settings" onclick="switchPage('settings')">设置</button>
   </div>
+  <div class="nav-drag"></div>
 </nav>
 
 <div class="container">
@@ -2070,44 +2285,6 @@
             <button class="ctrl-btn" id="stopBtn" title="停止">■</button>
             <button class="ctrl-btn" id="nextBtn" title="下一首">▶▶</button>
           </div>
-          <div class="speed-row" id="speedBtns">
-            <button class="speed-btn" data-speed="0.5">0.5x</button>
-            <button class="speed-btn" data-speed="0.75">0.75x</button>
-            <button class="speed-btn active" data-speed="1">1.0x</button>
-            <button class="speed-btn" data-speed="1.25">1.25x</button>
-            <button class="speed-btn" data-speed="1.5">1.5x</button>
-            <button class="speed-btn" data-speed="2">2.0x</button>
-          </div>
-          <div class="selector-row">
-            <div class="selector-label">音色</div>
-            <div class="selector-btns" id="instrumentBtns">
-              <button class="sel-btn active" data-instrument="celesta">钟琴</button>
-              <button class="sel-btn" data-instrument="piano">钢琴</button>
-              <button class="sel-btn" data-instrument="guitar">吉他</button>
-              <button class="sel-btn" data-instrument="pipa">琵琶</button>
-              <button class="sel-btn" data-instrument="violin">小提琴</button>
-            </div>
-          </div>
-          <div class="selector-row">
-            <div class="selector-label">选调</div>
-            <div class="selector-btns" id="pitchBtns">
-              <button class="sel-btn" data-pitch="0">原调</button>
-              <button class="sel-btn" data-pitch="1">#C</button>
-              <button class="sel-btn" data-pitch="2">D</button>
-              <button class="sel-btn" data-pitch="3">#D</button>
-              <button class="sel-btn" data-pitch="4">E</button>
-              <button class="sel-btn" data-pitch="5">F</button>
-              <button class="sel-btn" data-pitch="6">#F</button>
-              <button class="sel-btn" data-pitch="7">G</button>
-              <button class="sel-btn" data-pitch="-1">B</button>
-              <button class="sel-btn" data-pitch="-2">A</button>
-              <button class="sel-btn" data-pitch="-3">#A</button>
-              <button class="sel-btn" data-pitch="-4">A↓</button>
-              <button class="sel-btn" data-pitch="-5">G↓</button>
-              <button class="sel-btn" data-pitch="-6">#G↓</button>
-              <button class="sel-btn" data-pitch="-7">G↓2</button>
-            </div>
-          </div>
           <div class="selector-row" style="display:none;">
             <div class="selector-label">键位</div>
             <div class="selector-btns">
@@ -2135,14 +2312,6 @@
           </div>
         </div>
       </div>
-    </div>
-
-    <!-- Format Info -->
-    <div class="format-info">
-      <p><strong>支持的乐谱格式：</strong></p>
-      <p>JSON 格式（Sky Studio 导出）：<code>{"name":"曲名","bpm":510,"songNotes":[{"time":0,"key":"1Key4"}]}</code></p>
-      <p>TXT 格式（ABC1/5）：A1-A5 / B1-B5 / C1-C5 表示 15 个琴键，<code>.</code> 表示休止</p>
-      <p>加载的乐谱会自动保存到曲库中，下次打开无需重新上传</p>
     </div>
   </div>
 
@@ -2235,6 +2404,7 @@
       <div class="library-toolbar">
         <input type="text" class="lib-search" id="libSearch" placeholder="搜索曲名或作者...">
         <button class="lib-import-btn" id="libImportBtn">导入乐谱文件</button>
+        <button class="lib-folder-btn" id="libFolderBtn">📁 导入文件夹</button>
         <button class="lib-clear-btn" id="libClearBtn">清空曲库</button>
       </div>
       <!-- Category Bar -->
@@ -2243,7 +2413,7 @@
       <div class="upload-area" id="uploadArea">
         <div class="upload-icon">♫</div>
         <h3>拖放光遇乐谱文件或文件夹到此处</h3>
-        <p>支持 JSON / TXT 文件，可拖入文件夹自动识别其中所有乐谱</p>
+        <p>支持 JSON / TXT 文件；拖入文件夹会自动以文件夹名创建分类；点「📁 导入文件夹」可选择本地文件夹导入</p>
         <div class="format-badge">.json</div>
         <div class="format-badge">.txt</div>
         <div class="format-badge">文件夹</div>
@@ -2329,10 +2499,12 @@
   <!-- ===== About Page ===== -->
   <div class="page" id="page-about">
     <div class="about-page">
-      <h2>关于光遇乐谱播放器 v0.2</h2>
+      <h2>关于 SKY弹琴助手 v0.2</h2>
       <p>这是一个用于识别和播放《光·遇》(Sky: Children of the Light) 游戏乐谱的网页应用。支持 Sky Studio 导出的 JSON 格式和 ABC1/5 TXT 格式乐谱文件。</p>
       <h2>关注抖音 3Q22976</h2>
       <p>感谢你的支持，欢迎关注抖音账号 3Q22976，获取更多光遇乐谱和弹奏技巧。</p>
+      <h2>交流分享加群</h2>
+      <p>欢迎加入交流分享群 <strong style="color: var(--text);">742518966</strong>，一起分享乐谱、交流弹奏心得、反馈建议，获取最新功能更新。</p>
       <h2>功能特性</h2>
       <ul>
         <li>支持 JSON 和 TXT 两种乐谱格式，自动识别</li>
@@ -2397,6 +2569,61 @@
       <h3>界面颜色</h3>
       <p class="settings-desc">选择喜欢的界面主题配色，设置自动保存。</p>
       <div class="theme-grid" id="themeGrid"><div class="theme-card active"><div class="theme-preview"><div class="tp-bg" style="background: rgb(10, 10, 10);"></div><div class="tp-accent" style="background: rgb(232, 232, 232);"></div></div><span class="theme-check">✓</span><div class="theme-name">深邃黑</div></div><div class="theme-card"><div class="theme-preview"><div class="tp-bg" style="background: rgb(10, 14, 26);"></div><div class="tp-accent" style="background: rgb(109, 180, 255);"></div></div><span class="theme-check">✓</span><div class="theme-name">午夜蓝</div></div><div class="theme-card"><div class="theme-preview"><div class="tp-bg" style="background: rgb(10, 20, 16);"></div><div class="tp-accent" style="background: rgb(92, 230, 160);"></div></div><span class="theme-check">✓</span><div class="theme-name">翡翠绿</div></div><div class="theme-card"><div class="theme-preview"><div class="tp-bg" style="background: rgb(16, 10, 24);"></div><div class="tp-accent" style="background: rgb(200, 154, 255);"></div></div><span class="theme-check">✓</span><div class="theme-name">紫水晶</div></div><div class="theme-card"><div class="theme-preview"><div class="tp-bg" style="background: rgb(26, 10, 8);"></div><div class="tp-accent" style="background: rgb(255, 154, 92);"></div></div><span class="theme-check">✓</span><div class="theme-name">日落橙</div></div><div class="theme-card"><div class="theme-preview"><div class="tp-bg" style="background: rgb(24, 10, 16);"></div><div class="tp-accent" style="background: rgb(255, 107, 157);"></div></div><span class="theme-check">✓</span><div class="theme-name">蔷薇红</div></div></div>
+    </div>
+
+    <!-- 播放设置 -->
+    <div class="settings-section">
+      <h3>播放设置</h3>
+      <p class="settings-desc">调整播放速度、乐器音色与选调，设置会即时生效。</p>
+      <div class="speed-row" id="speedBtns">
+        <button class="speed-btn" data-speed="0.5">0.5x</button>
+        <button class="speed-btn" data-speed="0.75">0.75x</button>
+        <button class="speed-btn active" data-speed="1">1.0x</button>
+        <button class="speed-btn" data-speed="1.25">1.25x</button>
+        <button class="speed-btn" data-speed="1.5">1.5x</button>
+        <button class="speed-btn" data-speed="2">2.0x</button>
+      </div>
+      <div class="selector-row">
+        <div class="selector-label">音色</div>
+        <div class="selector-btns" id="instrumentBtns">
+          <button class="sel-btn active" data-instrument="celesta">钟琴</button>
+          <button class="sel-btn" data-instrument="piano">钢琴</button>
+          <button class="sel-btn" data-instrument="guitar">吉他</button>
+          <button class="sel-btn" data-instrument="pipa">琵琶</button>
+          <button class="sel-btn" data-instrument="violin">小提琴</button>
+        </div>
+      </div>
+      <div class="selector-row">
+        <div class="selector-label">选调</div>
+        <div class="selector-btns" id="pitchBtns">
+          <button class="sel-btn" data-pitch="0">原调</button>
+          <button class="sel-btn" data-pitch="1">#C</button>
+          <button class="sel-btn" data-pitch="2">D</button>
+          <button class="sel-btn" data-pitch="3">#D</button>
+          <button class="sel-btn" data-pitch="4">E</button>
+          <button class="sel-btn" data-pitch="5">F</button>
+          <button class="sel-btn" data-pitch="6">#F</button>
+          <button class="sel-btn" data-pitch="7">G</button>
+          <button class="sel-btn" data-pitch="-1">B</button>
+          <button class="sel-btn" data-pitch="-2">A</button>
+          <button class="sel-btn" data-pitch="-3">#A</button>
+          <button class="sel-btn" data-pitch="-4">A↓</button>
+          <button class="sel-btn" data-pitch="-5">G↓</button>
+          <button class="sel-btn" data-pitch="-6">#G↓</button>
+          <button class="sel-btn" data-pitch="-7">G↓2</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 支持的乐谱格式 -->
+    <div class="settings-section">
+      <h3>支持的乐谱格式</h3>
+      <p class="settings-desc">可导入的乐谱文件格式说明，方便从 Sky Studio 等工具制作或导入。</p>
+      <ul class="settings-format-list">
+        <li><strong>JSON（Sky Studio 导出）：</strong><code>{"name":"曲名","bpm":510,"songNotes":[{"time":0,"key":"1Key4"}]}</code></li>
+        <li><strong>TXT（ABC1/5）：</strong>A1-A5 / B1-B5 / C1-C5 表示 15 个琴键，<code>.</code> 表示休止</li>
+        <li>加载的乐谱会自动保存到曲库中，下次打开无需重新上传</li>
+      </ul>
     </div>
   </div>
 </div>
@@ -2906,6 +3133,37 @@ function decryptSongNotes(encryptedInts) {
   if (idx !== -1) str = str.substring(0, idx);
   return JSON.parse(str);
 }
+// 识别并转换 mgm.manual_draft 录音草稿格式
+// 结构: { format:'mgm.manual_draft', savedDraft:{ name, draft:{ bpm, recording:{ events:[{keyIndex(1~15), startMs, durationMs, velocity}] } } } }
+// 转换: keyIndex 为 1-based(1~15) → 应用内部 '1Key0'~'1Key14'; startMs 直接作为播放时间(毫秒)
+function parseMGMFile(song) {
+  if (!song || song.format !== 'mgm.manual_draft') return null;
+  var savedDraft = song.savedDraft;
+  if (!savedDraft || !savedDraft.draft) return null;
+  var draft = savedDraft.draft;
+  var recording = draft.recording;
+  if (!recording || !Array.isArray(recording.events)) return null;
+  var songNotes = [];
+  for (var k = 0; k < recording.events.length; k++) {
+    var e = recording.events[k];
+    if (!e || typeof e.keyIndex !== 'number' || typeof e.startMs !== 'number') continue;
+    if (e.keyIndex < 1 || e.keyIndex > 15) continue; // mgm 键索引为 1~15
+    songNotes.push({ time: e.startMs, key: '1Key' + (e.keyIndex - 1) });
+  }
+  if (songNotes.length === 0) return null;
+  songNotes.sort(function (a, b) { return a.time - b.time; });
+  return {
+    name: savedDraft.name || '未命名曲目',
+    author: '',
+    transcribedBy: '',
+    isComposed: true,
+    bpm: draft.bpm || 120,
+    pitchLevel: 0,
+    isEncrypted: false,
+    songNotes: songNotes
+  };
+}
+
 function parseJSONFile(text) {
   let data;
   try {
@@ -2917,6 +3175,9 @@ function parseJSONFile(text) {
   var result = [];
   for (var i = 0; i < songList.length; i++) {
     var song = songList[i];
+    // mgm.manual_draft 录音草稿 → 标准乐谱
+    var mgmSong = parseMGMFile(song);
+    if (mgmSong) { result.push(mgmSong); continue; }
     if (!song || !song.songNotes || !Array.isArray(song.songNotes)) continue;
     if (song.isEncrypted && song.songNotes.length > 0 && typeof song.songNotes[0] === 'number') {
       try {
@@ -3031,77 +3292,56 @@ function validateSong(song) {
 }
 
 // 处理拖入的文件（支持单个/多个文件及文件夹）
+// 拖入文件夹时,自动用文件夹名建立分类,文件夹内(含子目录)的歌曲归入该分类
 function handleDrop(dataTransfer) {
   const items = dataTransfer && dataTransfer.items;
-  const filePaths = [];
-  const collectFiles = (item) => {
-    const entry = item.webkitGetAsEntry ? item.webkitGetAsEntry() : null;
-    if (!entry) return;
-    if (entry.isFile) {
-      entry.file((f) => filePaths.push(f), () => {});
-    } else if (entry.isDirectory) {
-      const reader = entry.createReader();
-      const readEntries = () => {
-        reader.readEntries((entries) => {
-          if (entries.length === 0) return;
-          entries.forEach((e) => {
-            if (e.isFile) {
-              e.file((f) => filePaths.push(f), () => {});
-            } else if (e.isDirectory) {
-              const subReader = e.createReader();
-              const subRead = () => {
-                subReader.readEntries((sub) => {
-                  if (sub.length === 0) return;
-                  sub.forEach((se) => {
-                    if (se.isFile) se.file((f) => filePaths.push(f), () => {});
-                    else if (se.isDirectory) walkDir(se);
-                  });
-                  subRead();
-                }, () => {});
-              };
-              subRead();
-            }
-          });
-          readEntries();
-        }, () => {});
-      };
-      readEntries();
-    }
-  };
-  // 通用递归目录遍历（处理嵌套）
-  const walkDir = (dirEntry) => {
+  const fileEntries = [];  // {file, folder},folder 为顶层文件夹名(即分类名),散文件为空串
+  // 递归遍历目录,folder 沿用顶层文件夹名
+  const walkDir = (dirEntry, folder) => {
     const reader = dirEntry.createReader();
     const readBatch = () => {
       reader.readEntries((entries) => {
         if (entries.length === 0) return;
         entries.forEach((e) => {
-          if (e.isFile) e.file((f) => filePaths.push(f), () => {});
-          else if (e.isDirectory) walkDir(e);
+          if (e.isFile) e.file((f) => fileEntries.push({ file: f, folder: folder }), () => {});
+          else if (e.isDirectory) walkDir(e, folder);
         });
         readBatch();
       }, () => {});
     };
     readBatch();
   };
+  const collectFiles = (item) => {
+    const entry = item.webkitGetAsEntry ? item.webkitGetAsEntry() : null;
+    if (!entry) return;
+    if (entry.isFile) {
+      entry.file((f) => fileEntries.push({ file: f, folder: '' }), () => {});
+    } else if (entry.isDirectory) {
+      walkDir(entry, entry.name);
+    }
+  };
 
   if (items && items.length > 0) {
-    // 用 entry API 收集所有文件（含文件夹内）
+    // 用 entry API 收集所有文件（含文件夹内）,并记录所属文件夹
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
       if (item.kind === 'file') collectFiles(item);
     }
     // 异步收集完成后统一处理
     setTimeout(() => {
-      if (filePaths.length > 0) handleFiles(filePaths);
+      if (fileEntries.length > 0) handleFiles(fileEntries);
     }, 300);
   } else if (dataTransfer && dataTransfer.files && dataTransfer.files.length > 0) {
+    // 旧 API 兜底:无法读取文件夹信息,按未分类处理
     handleFiles(Array.from(dataTransfer.files));
   }
 }
 
 // 批量处理多个文件（含从文件夹收集到的文件）
+// files 元素:File 对象(散文件,未分类) 或 {file, folder}(folder 为拖入的顶层文件夹名)
 function handleFiles(files) {
-  const supported = files.filter(f => {
+  const supported = files.filter(x => {
+    const f = x.file || x;
     const ext = (f.name || '').split('.').pop().toLowerCase();
     return ext === 'json' || ext === 'txt';
   });
@@ -3114,29 +3354,32 @@ function handleFiles(files) {
   const failed = [];
   const loadedCount = supported.length;
 
-  supported.forEach((file) => {
+  supported.forEach((x) => {
+    const f = x.file || x;
+    const folder = x.folder || '';
     const reader = new FileReader();
     reader.onload = function(e) {
       try {
-        const parsed = parseSongFile(file, e.target.result);
+        const parsed = parseSongFile(f, e.target.result);
         if (parsed && parsed.length > 0) {
+          parsed.forEach((s) => { s.category = folder; });
           allSongs.push.apply(allSongs, parsed);
         } else {
-          failed.push(file.name);
+          failed.push(f.name);
         }
       } catch (err) {
-        failed.push(file.name);
+        failed.push(f.name);
       } finally {
         done++;
         if (done >= loadedCount) finishHandleFiles(allSongs, failed, loadedCount);
       }
     };
     reader.onerror = function() {
-      failed.push(file.name);
+      failed.push(f.name);
       done++;
       if (done >= loadedCount) finishHandleFiles(allSongs, failed, loadedCount);
     };
-    reader.readAsText(file, 'UTF-8');
+    reader.readAsText(f, 'UTF-8');
   });
 }
 
@@ -3149,8 +3392,98 @@ function finishHandleFiles(allSongs, failed, loadedCount) {
     showError(msg);
     return;
   }
-  const sourceNote = loadedCount + ' 个文件' + (failed.length > 0 ? '（' + failed.length + ' 个失败）' : '');
+  // 按拖入的文件夹自动建立分类
+  const catSet = {};
+  validSongs.forEach((s) => { if (s.category) catSet[s.category] = true; });
+  Object.keys(catSet).forEach(ensureCategory);
+  const catCount = Object.keys(catSet).length;
+  const sourceNote = loadedCount + ' 个文件' + (failed.length > 0 ? '（' + failed.length + ' 个失败）' : '') +
+    (catCount > 0 ? '，自动建立 ' + catCount + ' 个分类' : '');
   loadSongs(validSongs, sourceNote);
+  // 同步到跟弹悬浮窗换曲面板
+  if (window.syncSongsToOverlay) window.syncSongsToOverlay();
+}
+
+// ====================== 文件夹导入 ======================
+
+// 确保分类存在(不切换当前选中)
+function ensureCategory(name) {
+  name = (name || '').trim();
+  if (!name) return;
+  const categories = loadCategoriesFromStorage();
+  if (categories.indexOf(name) < 0) {
+    categories.push(name);
+    saveCategoriesToStorage(categories);
+  }
+}
+
+// 通过主进程选择本地文件夹批量导入曲库:每个子文件夹自动成为一个分类
+async function importLibraryFolder() {
+  if (!window.desktopAPI || !window.desktopAPI.importLibraryFolder) {
+    showError('当前环境不支持读取本地文件夹，请使用桌面版运行。');
+    return;
+  }
+  let result;
+  try {
+    result = await window.desktopAPI.importLibraryFolder();
+  } catch (err) {
+    showError('读取文件夹失败：' + ((err && err.message) || err));
+    return;
+  }
+  if (!result || result.canceled) return;
+  const files = result.files || [];
+  if (files.length === 0) {
+    showError('所选文件夹「' + (result.root || '') + '」中没有找到 .json / .txt 乐谱文件。');
+    return;
+  }
+
+  // 逐文件解析,子文件夹相对路径作为分类名
+  const validSongs = [];
+  const failed = [];
+  const failedMsgs = [];
+  files.forEach((f) => {
+    try {
+      const parsed = parseSongFile({ name: f.name + '.' + f.ext }, f.content);
+      (parsed || []).forEach((song) => {
+        if (!song || !validateSong(song)) return;
+        song.category = f.folder || '';
+        validSongs.push(song);
+      });
+      if (!parsed || parsed.length === 0) failed.push(f.name);
+    } catch (err) {
+      failed.push(f.name);
+      if (failedMsgs.length < 3) failedMsgs.push(f.name + '：' + ((err && err.message) || err));
+    }
+  });
+
+  if (validSongs.length === 0) {
+    showError('共扫描到 ' + files.length + ' 个乐谱文件，但均解析失败。请确认文件是光遇乐谱 JSON 或 TXT 格式。');
+    return;
+  }
+
+  // 按子文件夹建立分类
+  const catSet = {};
+  validSongs.forEach((s) => { if (s.category) catSet[s.category] = true; });
+  Object.keys(catSet).forEach(ensureCategory);
+
+  // 保存到曲库(自动去重)
+  let savedCount = 0;
+  let dupCount = 0;
+  validSongs.forEach((s) => { if (saveSongToLibrary(s)) savedCount++; else dupCount++; });
+
+  // 选中第一个导入的分类,方便立即查看
+  const cats = Object.keys(catSet);
+  setSelectedCategory(cats.length > 0 ? cats[0] : 'all');
+  renderLibrary();
+
+  showInfo('文件夹导入完成：解析 ' + files.length + ' 个文件，新增 ' + savedCount + ' 首乐谱' +
+    (dupCount > 0 ? '（跳过 ' + dupCount + ' 首重复）' : '') +
+    (failed.length > 0 ? '，' + failed.length + ' 个文件解析失败' : '') +
+    '，并按子文件夹自动建立 ' + cats.length + ' 个分类');
+  setTimeout(() => hideInfo(), 6000);
+
+  // 同步到跟弹悬浮窗换曲面板
+  if (window.syncSongsToOverlay) window.syncSongsToOverlay();
 }
 
 // 解析单个文件的文本内容，返回歌曲数组
@@ -3247,7 +3580,7 @@ function initDecryptPage() {
   var area = document.getElementById('decryptUploadArea');
   if (area && !area._dragBound) {
     area._dragBound = true;
-    area.addEventListener('dragover', function(e) { e.preventDefault(); this.style.borderColor = 'var(--gold)'; });
+    area.addEventListener('dragover', function(e) { e.preventDefault(); this.style.borderColor = 'var(--border-hover)'; });
     area.addEventListener('dragleave', function(e) { e.preventDefault(); this.style.borderColor = ''; });
     area.addEventListener('drop', function(e) {
       e.preventDefault();
@@ -3389,7 +3722,7 @@ function initJianpuPage() {
   var area = document.getElementById('jianpuUploadArea');
   if (area && !area._dragBound) {
     area._dragBound = true;
-    area.addEventListener('dragover', function(e) { e.preventDefault(); this.style.borderColor = 'var(--gold)'; });
+    area.addEventListener('dragover', function(e) { e.preventDefault(); this.style.borderColor = 'var(--border-hover)'; });
     area.addEventListener('dragleave', function(e) { e.preventDefault(); this.style.borderColor = ''; });
     area.addEventListener('drop', function(e) {
       e.preventDefault();
@@ -3846,12 +4179,120 @@ function addCategory(name) {
   return true;
 }
 
+// ====================== 通用模态框 ======================
+// Electron 不支持 window.prompt()/window.confirm(),统一使用自定义弹窗
+let _uiModalEl = null;
+function closeUIModal() { if (_uiModalEl) { _uiModalEl.remove(); _uiModalEl = null; } }
+
+function _modalSafe(v) {
+  return String(v == null ? '' : v)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// 输入框弹窗,resolve 值为输入文本,取消为 null
+function showPromptModal(opts) {
+  return new Promise((resolve) => {
+    closeUIModal();
+    const overlay = document.createElement('div');
+    overlay.className = 'ui-modal-overlay';
+    overlay.innerHTML =
+      '<div class="ui-modal">' +
+        '<h3>' + _modalSafe(opts.title || '请输入') + '</h3>' +
+        '<input type="text" class="ui-modal-input" placeholder="' + _modalSafe(opts.placeholder || '') + '" value="' + _modalSafe(opts.initialValue || '') + '">' +
+        '<div class="ui-modal-actions">' +
+          '<button class="ui-modal-btn ui-modal-cancel" type="button">取消</button>' +
+          '<button class="ui-modal-btn ui-modal-ok" type="button">' + _modalSafe(opts.confirmText || '确定') + '</button>' +
+        '</div>' +
+      '</div>';
+    const input = overlay.querySelector('.ui-modal-input');
+    const finish = (val) => { closeUIModal(); resolve(val); };
+    overlay.addEventListener('mousedown', (e) => { if (e.target === overlay) finish(null); });
+    overlay.querySelector('.ui-modal-cancel').addEventListener('click', () => finish(null));
+    overlay.querySelector('.ui-modal-ok').addEventListener('click', () => finish(input.value));
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); finish(input.value); }
+      else if (e.key === 'Escape') finish(null);
+    });
+    _uiModalEl = overlay;
+    document.body.appendChild(overlay);
+    setTimeout(() => { input.focus(); input.select(); }, 0);
+  });
+}
+
+// 确认弹窗,resolve 为 true/false
+function showConfirmModal(opts) {
+  return new Promise((resolve) => {
+    closeUIModal();
+    const overlay = document.createElement('div');
+    overlay.className = 'ui-modal-overlay';
+    overlay.innerHTML =
+      '<div class="ui-modal">' +
+        '<h3>' + _modalSafe(opts.title || '确认操作') + '</h3>' +
+        '<p class="ui-modal-msg">' + _modalSafe(opts.message || '') + '</p>' +
+        '<div class="ui-modal-actions">' +
+          '<button class="ui-modal-btn ui-modal-cancel" type="button">取消</button>' +
+          '<button class="ui-modal-btn ui-modal-ok' + (opts.danger ? ' ui-modal-danger' : '') + '" type="button">' + _modalSafe(opts.confirmText || '确定') + '</button>' +
+        '</div>' +
+      '</div>';
+    const finish = (val) => { closeUIModal(); resolve(val); };
+    overlay.addEventListener('mousedown', (e) => { if (e.target === overlay) finish(false); });
+    overlay.querySelector('.ui-modal-cancel').addEventListener('click', () => finish(false));
+    overlay.querySelector('.ui-modal-ok').addEventListener('click', () => finish(true));
+    overlay.addEventListener('keydown', (e) => { if (e.key === 'Escape') finish(false); });
+    _uiModalEl = overlay;
+    document.body.appendChild(overlay);
+    setTimeout(() => overlay.querySelector('.ui-modal-ok').focus(), 0);
+  });
+}
+
+// 下拉选择弹窗,resolve 为选中的 value,取消为 null
+// opts: { title, options: [{value,label}], initialValue, confirmText }
+function showSelectModal(opts) {
+  return new Promise((resolve) => {
+    closeUIModal();
+    const overlay = document.createElement('div');
+    overlay.className = 'ui-modal-overlay';
+    const options = (opts.options || []).map(function(o) {
+      const sel = (o.value === opts.initialValue) ? ' selected' : '';
+      return '<option value="' + _modalSafe(o.value) + '"' + sel + '>' + _modalSafe(o.label) + '</option>';
+    }).join('');
+    overlay.innerHTML =
+      '<div class="ui-modal">' +
+        '<h3>' + _modalSafe(opts.title || '请选择') + '</h3>' +
+        '<select class="ui-modal-select">' + options + '</select>' +
+        '<div class="ui-modal-actions">' +
+          '<button class="ui-modal-btn ui-modal-cancel" type="button">取消</button>' +
+          '<button class="ui-modal-btn ui-modal-ok" type="button">' + _modalSafe(opts.confirmText || '确定') + '</button>' +
+        '</div>' +
+      '</div>';
+    const sel = overlay.querySelector('.ui-modal-select');
+    const finish = (val) => { closeUIModal(); resolve(val); };
+    overlay.addEventListener('mousedown', (e) => { if (e.target === overlay) finish(null); });
+    overlay.querySelector('.ui-modal-cancel').addEventListener('click', () => finish(null));
+    overlay.querySelector('.ui-modal-ok').addEventListener('click', () => finish(sel.value));
+    sel.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); finish(sel.value); }
+      else if (e.key === 'Escape') finish(null);
+    });
+    _uiModalEl = overlay;
+    document.body.appendChild(overlay);
+    setTimeout(() => sel.focus(), 0);
+  });
+}
+
 // 删除分类（可保留歌曲，歌曲归为未分类）
-function deleteCategory(name) {
+async function deleteCategory(name) {
   const categories = loadCategoriesFromStorage();
   const idx = categories.indexOf(name);
   if (idx < 0) return false;
-  if (!confirm('确定删除分类「' + name + '」吗？该分类下的乐谱将变为未分类。')) return false;
+  const ok = await showConfirmModal({
+    title: '删除分类',
+    message: '确定删除分类「' + name + '」吗？该分类下的乐谱将变为未分类。',
+    confirmText: '删除',
+    danger: true
+  });
+  if (!ok) return false;
   categories.splice(idx, 1);
   saveCategoriesToStorage(categories);
   const library = loadLibraryFromStorage();
@@ -3862,16 +4303,25 @@ function deleteCategory(name) {
   return true;
 }
 
-function promptAddCategory() {
-  const name = prompt('输入新分类名称：');
+async function promptAddCategory() {
+  const name = await showPromptModal({
+    title: '新建分类',
+    placeholder: '输入新分类名称',
+    confirmText: '创建'
+  });
   if (name === null) return;
   if (!addCategory(name)) {
     alert('分类名称无效或已存在，请更换名称。');
   }
 }
 
-function promptRenameCategory(cat) {
-  const name = prompt('重命名分类「' + cat + '」为：', cat);
+async function promptRenameCategory(cat) {
+  const name = await showPromptModal({
+    title: '重命名分类',
+    initialValue: cat,
+    placeholder: '输入新的分类名称',
+    confirmText: '保存'
+  });
   if (name === null) return;
   if (!renameCategory(cat, name)) {
     alert('分类名称无效或已存在，请更换名称。');
@@ -3879,58 +4329,59 @@ function promptRenameCategory(cat) {
 }
 
 // 将指定歌曲归入某个分类
+// 歌曲唯一签名(用于在曲库中定位歌曲)
+function getSongSig(song) {
+  return (song.name||'')+'|'+(song.author||'')+'|'+(song.songNotes ? song.songNotes.length : 0);
+}
+
 function assignSongToCategory(song, category) {
   const library = loadLibraryFromStorage();
-  const idx = library.findIndex(s =>
-    (s.name||'')+'|'+(s.author||'')+'|'+s.songNotes.length ===
-    (song.name||'')+'|'+(song.author||'')+'|'+song.songNotes.length
-  );
+  const sig = getSongSig(song);
+  const idx = library.findIndex(s => getSongSig(s) === sig);
   if (idx < 0) return;
   library[idx].category = category || '';
   saveLibraryToStorage(library);
   renderLibrary();
+  showInfo((category ? '已归入「' + category + '」分类' : '已移出分类') + '：' + (song.name || '未知曲目'));
+  setTimeout(() => hideInfo(), 2500);
 }
 
 // 弹出分类选择器，将歌曲归入某个分类
-function promptAssignCategory(song) {
+async function promptAssignCategory(song) {
   const categories = loadCategoriesFromStorage();
   const current = song.category || '';
-  let opts = '';
-  opts += '0) 未分类（移出分类）\n';
-  categories.forEach((cat, i) => {
-    opts += (i + 1) + ') ' + cat + (cat === current ? '（当前）' : '') + '\n';
+  const options = [{ value: '', label: '未分类（移出分类）' }];
+  categories.forEach((cat) => {
+    options.push({ value: cat, label: cat + (cat === current ? '（当前）' : '') });
   });
-  const input = prompt(
-    '为「' + (song.name || '未知曲目') + '」选择分类：\n\n' + opts +
-    '\n输入分类序号，或直接输入新的分类名称：',
-    current
-  );
-  if (input === null) return;
+  options.push({ value: '__new__', label: '＋ 新建分类…' });
+  const selected = await showSelectModal({
+    title: '将「' + (song.name || '未知曲目') + '」归入分类',
+    options: options,
+    initialValue: current,
+    confirmText: '确定'
+  });
+  if (selected === null) return;
 
-  const trimmed = input.trim();
-  if (trimmed === '') return;
-  // 若输入的是序号
-  if (/^\d+$/.test(trimmed)) {
-    const num = parseInt(trimmed, 10);
-    if (num === 0) {
-      assignSongToCategory(song, '');
-      return;
+  if (selected === '__new__') {
+    const name = await showPromptModal({
+      title: '新建分类',
+      placeholder: '输入新分类名称',
+      confirmText: '创建'
+    });
+    if (name === null) return;
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    if (loadCategoriesFromStorage().indexOf(trimmed) < 0) {
+      if (!addCategory(trimmed)) {
+        alert('分类名称无效或已存在。');
+        return;
+      }
     }
-    if (num >= 1 && num <= categories.length) {
-      assignSongToCategory(song, categories[num - 1]);
-      return;
-    }
-    alert('分类序号无效。');
+    assignSongToCategory(song, trimmed);
     return;
   }
-  // 输入的是新名称：若已存在则直接归入，否则新建
-  if (categories.indexOf(trimmed) < 0) {
-    if (!addCategory(trimmed)) {
-      alert('分类名称无效或已存在。');
-      return;
-    }
-  }
-  assignSongToCategory(song, trimmed);
+  assignSongToCategory(song, selected);
 }
 
 // ====================== Cloud API ======================
@@ -4038,6 +4489,7 @@ function deleteSongFromLibrary(index) {
   library.splice(index, 1);
   saveLibraryToStorage(library);
   renderLibrary();
+  if (window.syncSongsToOverlay) window.syncSongsToOverlay();
 }
 
 function clearLibrary() {
@@ -4092,6 +4544,8 @@ function renderLibrary() {
   library.forEach((song, displayIndex) => {
     const card = document.createElement('div');
     card.className = 'lib-card';
+    card.draggable = true;
+    card.title = '点击播放；可拖到上方分类栏归入分类';
 
     const noteCount = song.songNotes ? song.songNotes.length : 0;
     const bpm = song.bpm || '—';
@@ -4112,7 +4566,20 @@ function renderLibrary() {
         '<span class="card-tag">' + noteCount + ' 音符</span>' +
       '</div>';
 
+    // 拖拽标志:拖拽结束会补发一次 click,需要拦截
+    let dragMoved = false;
+    card.addEventListener('dragstart', (e) => {
+      dragMoved = true;
+      card.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', getSongSig(song));
+    });
+    card.addEventListener('dragend', () => {
+      card.classList.remove('dragging');
+    });
+
     card.addEventListener('click', (e) => {
+      if (dragMoved) { dragMoved = false; return; }
       if (e.target.closest('.card-delete')) return;
       if (e.target.closest('.card-share')) return;
       if (e.target.closest('.card-cat')) return;
@@ -4138,7 +4605,11 @@ function renderLibrary() {
           navigator.clipboard.writeText(url);
           alert('已上传并复制分享链接：\n' + url);
         } else {
-          prompt('已上传！分享链接：', url);
+          showConfirmModal({
+            title: '已上传！分享链接：',
+            message: url,
+            confirmText: '知道了'
+          });
         }
         setTimeout(function(){ shareBtn.textContent = '⬆'; }, 2000);
       } catch (err) {
@@ -4148,14 +4619,21 @@ function renderLibrary() {
     });
 
     const delBtn = card.querySelector('.card-delete');
-    delBtn.addEventListener('click', (e) => {
+    delBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
       const realLib = loadLibraryFromStorage();
       const idx = realLib.findIndex(s =>
         (s.name||'')+'|'+(s.author||'')+'|'+s.songNotes.length ===
         (song.name||'')+'|'+(song.author||'')+'|'+song.songNotes.length
       );
-      if (idx >= 0) deleteSongFromLibrary(idx);
+      if (idx < 0) return;
+      const ok = await showConfirmModal({
+        title: '确定删除「' + (song.name || '未知曲目') + '」吗？',
+        message: '删除后将从曲库中移除，此操作不可撤销。',
+        confirmText: '删除',
+        danger: true
+      });
+      if (ok) deleteSongFromLibrary(idx);
     });
 
     grid.appendChild(card);
@@ -4197,6 +4675,26 @@ function renderCategoryBar(library, categories, selectedCat) {
       setSelectedCategory(value);
       renderLibrary();
     });
+    // 拖放归类:把歌曲卡片拖到分类上松开即归入(「全部」不接受拖放)
+    if (value !== 'all') {
+      chip.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        chip.classList.add('drag-over');
+      });
+      chip.addEventListener('dragleave', () => chip.classList.remove('drag-over'));
+      chip.addEventListener('drop', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        chip.classList.remove('drag-over');
+        const sig = e.dataTransfer.getData('text/plain');
+        if (!sig) return;
+        const library = loadLibraryFromStorage();
+        const song = library.find(s => getSongSig(s) === sig);
+        if (!song) return;
+        assignSongToCategory(song, value === '__none__' ? '' : value);
+      });
+    }
     bar.appendChild(chip);
   }
 
@@ -4700,8 +5198,13 @@ function initSettingsPage() {
   var keymapBtn = document.getElementById('settingsKeymapBtn');
   if (keymapBtn) keymapBtn.onclick = openKeymapSettings;
   var keymapResetBtn = document.getElementById('settingsKeymapResetBtn');
-  if (keymapResetBtn) keymapResetBtn.onclick = function () {
-    if (confirm('确定恢复默认按键映射吗？')) {
+  if (keymapResetBtn) keymapResetBtn.onclick = async function () {
+    const ok = await showConfirmModal({
+      title: '恢复默认按键映射',
+      message: '确定恢复默认按键映射吗？',
+      confirmText: '恢复'
+    });
+    if (ok) {
       resetKeyMap();
       renderKeymapGrid();
       alert('已恢复默认按键映射');
@@ -5046,7 +5549,7 @@ function getDemoSong() {
   return [{
     name: '小星星 (示例)',
     author: 'Demo',
-    transcribedBy: 'Sky Music Player',
+    transcribedBy: 'SKY弹琴助手',
     isComposed: true,
     bpm: bpm,
     bitsPerPage: 16,
@@ -5189,6 +5692,14 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
+  // 自绘标题栏:最小化/关闭(浏览器环境静默降级)
+  window.minimizeWindow = function () {
+    if (window.desktopAPI) window.desktopAPI.minimizeWindow();
+  };
+  window.closeWindow = function () {
+    if (window.desktopAPI) window.desktopAPI.closeWindow();
+  };
+
   // 桌面版提示横幅:仅在浏览器(非桌面版)中显示,用户可关闭(本地记忆)
   (function initDesktopBanner() {
     const isDesktop = !!window.desktopAPI;
@@ -5206,11 +5717,36 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   })();
 
+  // 把曲库+当前播放列表同步给主进程,供悬浮窗"换曲面板"选择
+  window.syncSongsToOverlay = function syncSongsToOverlay() {
+    if (!window.desktopAPI || !window.desktopAPI.syncSongs) return;
+    const list = [];
+    const seen = {};
+    const push = (song) => {
+      if (!song || !song.songNotes || !Array.isArray(song.songNotes) || song.songNotes.length === 0) return;
+      const sig = (song.name || '') + '|' + (song.author || '') + '|' + song.songNotes.length;
+      if (seen[sig]) return;
+      seen[sig] = true;
+      list.push({
+        name: song.name || '未知曲目',
+        author: song.author || '',
+        songNotes: song.songNotes,
+        bpm: song.bpm || 120,
+        pitchLevel: song.pitchLevel || 0,
+        category: song.category || ''
+      });
+    };
+    try { (loadLibraryFromStorage() || []).forEach(push); } catch (e) { /* ignore */ }
+    state.songs.forEach(push);
+    window.desktopAPI.syncSongs(list);
+  };
+
   // 跟弹悬浮窗(桌面模式):把当前乐谱与键位发给主进程,打开透明置顶悬浮窗
   window.openPracticeOverlay = function openPracticeOverlay() {
       const song = getCurrentSong();
       if (!song || !song.songNotes || song.songNotes.length === 0) { showError('请先加载乐谱'); return; }
       if (!window.desktopAPI) { showError('请在桌面版应用中使用跟弹悬浮窗'); return; }
+      window.syncSongsToOverlay();
       const songPl = song.pitchLevel || 0;
       window.desktopAPI.openOverlay({
         name: song.name || '未知曲目',
@@ -5339,12 +5875,20 @@ document.addEventListener('DOMContentLoaded', function() {
     fileInput.click();
   });
 
-  document.getElementById('libClearBtn').addEventListener('click', () => {
+  document.getElementById('libFolderBtn').addEventListener('click', () => {
+    importLibraryFolder();
+  });
+
+  document.getElementById('libClearBtn').addEventListener('click', async () => {
     const lib = loadLibraryFromStorage();
     if (lib.length === 0) return;
-    if (confirm('确定要清空曲库中的全部 ' + lib.length + ' 首乐谱吗？此操作不可撤销。')) {
-      clearLibrary();
-    }
+    const ok = await showConfirmModal({
+      title: '清空曲库',
+      message: '确定要清空曲库中的全部 ' + lib.length + ' 首乐谱吗？此操作不可撤销。',
+      confirmText: '清空',
+      danger: true
+    });
+    if (ok) clearLibrary();
   });
 
   document.getElementById('cloudTabLocal').addEventListener('click', function() {
@@ -5628,8 +6172,14 @@ const Composer = (function () {
     else c.playTimer = timer;
   }
 
-  function clear() {
-    if (!confirm('确定要清空所有音符吗？')) return;
+  async function clear() {
+    const ok = await showConfirmModal({
+      title: '清空音符',
+      message: '确定要清空所有音符吗？',
+      confirmText: '清空',
+      danger: true
+    });
+    if (!ok) return;
     if (c.isRecording) {
       c.isRecording = false;
       const rb = document.getElementById('composerRecordBtn');
@@ -5783,11 +6333,16 @@ const Composer = (function () {
     URL.revokeObjectURL(url);
   }
 
-  function saveToLibrary() {
+  async function saveToLibrary() {
     var notes = buildSongNotes();
     if (notes.length === 0) { alert('乐谱是空的，先录几个音符吧～'); return; }
     var defaultName = c.sourceName ? c.sourceName + ' (改编)' : '自制乐谱';
-    var name = prompt('给你的乐谱起个名字：', defaultName);
+    var name = await showPromptModal({
+      title: '保存到曲库',
+      initialValue: defaultName,
+      placeholder: '给乐谱起个名字',
+      confirmText: '保存'
+    });
     if (!name) return;
     var song = {
       id: 'composed_' + Date.now(),

@@ -11,19 +11,19 @@ let captureWindow = null;      // 截图对齐窗口
 let lastPayload = null;        // 最近一次 openOverlay 载荷(重开/换曲时复用键位与倍速)
 let overlayVisible = false;    // 悬浮窗隐藏/显示状态
 let overlayInteractive = false;// 悬浮窗主动请求可交互(微调/换曲面板)
+let overlaySongCache = [];     // 主窗口同步的本地歌曲列表(含 songNotes,供悬浮窗换曲)
 
 const TOOLBAR_H = 52;          // 悬浮窗顶部可点击工具条高度(DIP)
 
 // ---------- 主窗口 ----------
 function createWindow(url) {
   mainWindow = new BrowserWindow({
-    width: 1400,
-    height: 900,
-    minWidth: 1080,
-    minHeight: 700,
-    autoHideMenuBar: true,
-    backgroundColor: '#0d0d14',
-    title: '光遇乐谱播放器',
+    width: 1100,
+    height: 700,
+    resizable: false,
+    frame: false,
+    transparent: true,
+    title: 'SKY弹琴助手',
     icon: path.join(__dirname, 'icon.png'),
     webPreferences: {
       contextIsolation: true,
@@ -190,6 +190,17 @@ function startCapture() {
 
 // ---------- IPC ----------
 function registerIpc() {
+  // 主窗口:自绘标题栏最小化
+  ipcMain.on('win:minimize', (e) => {
+    const w = BrowserWindow.fromWebContents(e.sender);
+    if (w && !w.isDestroyed()) w.minimize();
+  });
+  // 主窗口:自绘标题栏关闭
+  ipcMain.on('win:close', (e) => {
+    const w = BrowserWindow.fromWebContents(e.sender);
+    if (w && !w.isDestroyed()) w.close();
+  });
+
   // 主窗口:打开/更新跟弹悬浮窗
   ipcMain.on('overlay:open', (e, payload) => {
     createOverlay(payload || {});
@@ -252,8 +263,22 @@ function registerIpc() {
     if (captureWindow) { captureWindow.close(); captureWindow = null; }
   });
 
-  // 悬浮窗:获取本地乐谱列表(读数据文件)
+  // 主窗口:同步本地歌曲列表(曲库+播放列表),供悬浮窗换曲面板使用
+  ipcMain.on('overlay:sync-songs', (e, songs) => {
+    overlaySongCache = Array.isArray(songs) ? songs.filter((s) => s && s.songNotes) : [];
+  });
+
+  // 悬浮窗:获取可选歌曲列表(优先主窗口同步的本地歌曲,其次读数据文件)
   ipcMain.handle('overlay:list-songs', async () => {
+    if (overlaySongCache.length) {
+      return { songs: overlaySongCache.map((s, i) => ({
+        id: i,
+        name: s.name || '未知曲目',
+        author: s.author || '',
+        category: s.category || '',
+        source: 'local'
+      })) };
+    }
     try {
       const file = server ? server.dataFile : null;
       if (!file || !fs.existsSync(file)) return { songs: [] };
@@ -262,6 +287,7 @@ function registerIpc() {
         id: s.id,
         name: s.name,
         author: s.author || '',
+        category: s.category || '',
         source: 'local'
       }));
       return { songs };
@@ -270,8 +296,24 @@ function registerIpc() {
     }
   });
 
-  // 悬浮窗:切换歌曲(推新数据到悬浮窗)
+  // 悬浮窗:切换歌曲(优先主窗口同步的本地歌曲,其次数据文件)
   ipcMain.handle('overlay:select-song', async (e, id) => {
+    // 1) 主窗口同步的歌曲: id 为数组索引
+    if (overlaySongCache.length && typeof id === 'number' && id >= 0 && id < overlaySongCache.length) {
+      const s = overlaySongCache[id];
+      const payload = Object.assign({}, lastPayload || {}, {
+        name: s.name || '未知曲目',
+        author: s.author || '',
+        songNotes: s.songNotes,
+        pitchLevel: s.pitchLevel || 0
+      });
+      lastPayload = payload;
+      if (overlayWindow && !overlayWindow.isDestroyed()) {
+        overlayWindow.webContents.send('overlay:data', payload);
+      }
+      return { ok: true };
+    }
+    // 2) 数据文件中的云乐谱
     try {
       const file = server ? server.dataFile : null;
       if (!file || !fs.existsSync(file)) return { ok: false, error: '数据文件不存在' };
@@ -294,6 +336,49 @@ function registerIpc() {
     } catch (err) {
       return { ok: false, error: String((err && err.message) || err) };
     }
+  });
+
+  // 主窗口:选择文件夹批量导入曲库(子文件夹名自动成为分类)
+  ipcMain.handle('library:import-folder', async (e) => {
+    const owner = mainWindow && !mainWindow.isDestroyed() ? mainWindow : null;
+    const result = await dialog.showOpenDialog(owner, {
+      title: '选择乐谱文件夹（每个子文件夹将自动成为一个分类）',
+      buttonLabel: '导入此文件夹',
+      properties: ['openDirectory']
+    });
+    if (result.canceled || !result.filePaths || !result.filePaths.length) {
+      return { canceled: true, root: '', files: [] };
+    }
+    const root = result.filePaths[0];
+    const files = [];
+    const MAX_FILES = 3000;
+    // 递归扫描:子文件夹名(相对路径)作为分类名,读取 .json/.txt 乐谱内容
+    const walk = (dir, folder) => {
+      let entries;
+      try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch (err) { return; }
+      entries.sort((a, b) => a.name.localeCompare(b.name, 'zh'));
+      for (const entry of entries) {
+        if (files.length >= MAX_FILES) return;
+        const full = path.join(dir, entry.name);
+        try {
+          if (entry.isDirectory()) {
+            walk(full, folder ? folder + '/' + entry.name : entry.name);
+          } else if (entry.isFile()) {
+            const ext = path.extname(entry.name).toLowerCase();
+            if (ext !== '.json' && ext !== '.txt') continue;
+            const content = fs.readFileSync(full, 'utf-8');
+            files.push({
+              folder: folder || '',
+              name: path.basename(entry.name, path.extname(entry.name)),
+              ext: ext.slice(1),
+              content
+            });
+          }
+        } catch (err) { /* 单个文件读取失败则跳过 */ }
+      }
+    };
+    walk(root, '');
+    return { canceled: false, root, files };
   });
 }
 

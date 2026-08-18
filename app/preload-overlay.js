@@ -18,6 +18,10 @@ contextBridge.exposeInMainWorld('overlayAPI', {
   selectSong: (id) => ipcRenderer.invoke('overlay:select-song', id),
   // 设置跟弹倍速(同步主窗口播放器速度档)
   setSpeed: (v) => ipcRenderer.send('overlay:set-speed', v),
+  // 自动弹奏:模拟敲击琴键索引 0-14(注入全局按键)
+  simKey: (idx) => ipcRenderer.send('overlay:sim-key', idx),
+  // 自动弹奏:清空主进程待模拟按键队列
+  clearSim: () => ipcRenderer.send('overlay:sim-clear'),
   // 接收乐谱数据
   onData: (cb) => ipcRenderer.on('overlay:data', (_e, payload) => cb(payload)),
   // 接收全局按键事件(琴键索引 0-14)

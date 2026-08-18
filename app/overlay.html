@@ -249,7 +249,7 @@
     display: none;
     position: absolute;
     top: 52px; left: 8px; right: 8px;
-    max-height: 264px;
+    max-height: 320px;
     background: rgba(14, 20, 36, 0.97);
     border: 1px solid rgba(120, 180, 255, 0.4);
     border-radius: 10px;
@@ -344,13 +344,38 @@
   .song-item.current { background: rgba(110, 240, 160, 0.14); }
   .song-item.current .song-tag { background: rgba(110, 240, 160, 0.28); color: #a5ffc9; }
 
+  /* 换曲面板:分类筛选条 */
+  .song-panel .sp-cats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 5px 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .song-panel .sp-cat {
+    flex: none;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.04);
+    color: #b9c8e6;
+    cursor: pointer;
+  }
+  .song-panel .sp-cat:hover { color: #fff; border-color: rgba(120, 180, 255, 0.6); }
+  .song-panel .sp-cat.active { color: #06122b; background: #7cc4ff; border-color: #7cc4ff; font-weight: 600; }
+
   /* ---------- 底部滚动谱面(3×5 网格块,每排 5 块,垂直滚动) ---------- */
   .scroller {
     position: absolute;
     left: 0; right: 0; bottom: 0;
     height: calc((66px * var(--scroll-scale, 1)) * var(--scroll-rows, 1)
                  + (14px * var(--scroll-scale, 1)) * (var(--scroll-rows, 1) - 1) + 10px);
-    background: rgba(12, 18, 32, 0.92);
+    background: rgba(0, 0, 0, var(--scroll-bg-alpha, 0.95));
     border: none;
     z-index: 5;
     overflow: hidden;
@@ -359,7 +384,7 @@
   body.scroll-adjust .scroller {
     border: 2px dashed rgba(255, 214, 79, 0.75);
     cursor: move;
-    background: rgba(20, 26, 44, 0.95);
+    background: rgba(0, 0, 0, var(--scroll-bg-alpha, 0.95));
   }
   .sc-notes {
     position: absolute;
@@ -396,14 +421,15 @@
     border: none;
     transition: background 0.12s ease, box-shadow 0.12s ease;
   }
-  /* 当前块(判定位):不用外框,靠整排格子提亮表示 */
+  /* 当前块(判定位):整排格子提亮 + 柔和底光,快速定位 */
   .sc-block.current-block {
-    background: transparent;
-    box-shadow: none;
+    background: rgba(255, 255, 255, 0.07);
+    border-radius: 4px;
+    box-shadow: 0 0 16px rgba(255, 255, 255, 0.22);
   }
   .sc-block.current-block .sc-cell {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.32);
+    border-color: rgba(255, 255, 255, 0.65);
   }
   /* 倒计时期间的空白预滚块:极淡占位,不显示音符,无虚线边界 */
   .sc-block.blank {
@@ -417,23 +443,24 @@
     box-shadow: none;
   }
   .sc-block.blank.current-block .sc-cell {
-    background: rgba(255, 255, 255, 0.055);
+    background: rgba(255, 255, 255, 0.09);
   }
   .sc-block.blank .sc-cell {
-    background: rgba(255, 255, 255, 0.02);
+    background: rgba(255, 255, 255, 0.045);
     border-color: transparent;
   }
+  /* 全黑底 + 白色高亮:空格格灰白描边,有音符纯白,播放中纯白发光 */
   .sc-cell {
     border-radius: 2px;
-    background: rgba(255, 255, 255, 0.055);
-    border: 1px solid rgba(255, 255, 255, 0.03);
+    background: rgba(255, 255, 255, 0.09);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     transition: background 0.12s ease, border-color 0.12s ease;
   }
-  .sc-cell.has-note { background: rgba(255, 255, 255, 0.22); border-color: rgba(255, 255, 255, 0.3); }
-  .sc-cell.playing-1 { background: #f2f2f2; border-color: #ffffff; box-shadow: 0 0 5px rgba(255, 255, 255, 0.9); }
-  .sc-cell.playing-2 { background: #7d7d7d; border-color: #b5b5b5; box-shadow: 0 0 5px rgba(255, 255, 255, 0.5); }
-  .sc-cell.played-1 { background: rgba(255, 255, 255, 0.13); border-color: rgba(255, 255, 255, 0.18); }
-  .sc-cell.played-2 { background: rgba(140, 140, 140, 0.2); border-color: rgba(180, 180, 180, 0.25); }
+  .sc-cell.has-note { background: rgba(255, 255, 255, 0.9); border-color: #ffffff; }
+  .sc-cell.playing-1 { background: #ffffff; border-color: #ffffff; box-shadow: 0 0 8px rgba(255, 255, 255, 0.95); }
+  .sc-cell.playing-2 { background: #e8e8e8; border-color: #f8f8f8; box-shadow: 0 0 6px rgba(255, 255, 255, 0.7); }
+  .sc-cell.played-1 { background: rgba(255, 255, 255, 0.5); border-color: rgba(255, 255, 255, 0.55); }
+  .sc-cell.played-2 { background: rgba(255, 255, 255, 0.28); border-color: rgba(255, 255, 255, 0.34); }
   /* 垂直滚动模式:竖直判定线不再需要 */
   .sc-guide { display: none; }
   /* 截图对齐模式:琴键区域拉满,但滚动谱面始终保留在最底部 */
@@ -445,7 +472,7 @@
     align-items: center;
     justify-content: center;
     font-size: 10px;
-    color: rgba(255, 255, 255, 0.4);
+    color: rgba(255, 255, 255, 0.55);
     letter-spacing: 1px;
     pointer-events: none;
     z-index: 1;
@@ -503,6 +530,10 @@
       <input class="cd-input" id="cdInput" type="number" min="0" max="60" step="0.5"
              title="开始跟弹前的倒计时(秒),0 表示立即开始" spellcheck="false" />
       <span class="grp-val">秒</span>
+      <span class="grp">谱面背景</span>
+      <button class="btn mini" id="alphaDown" title="谱面背景更透明">−</button>
+      <span class="grp-val" id="alphaVal">不透明</span>
+      <button class="btn mini" id="alphaUp" title="谱面背景更不透明">＋</button>
       <span class="status" id="status">待机</span>
       <span class="stats" id="stats"></span>
     </div>
@@ -515,6 +546,7 @@
       <button class="sp-close sp-refresh" id="songRefresh" title="刷新列表">⟳</button>
       <button class="sp-close" id="songPanelClose" title="关闭">×</button>
     </div>
+    <div class="sp-cats" id="songCats"></div>
     <div class="song-list" id="songList"></div>
   </div>
   <div class="toast" id="toast"></div>
@@ -553,6 +585,11 @@
   let countdownUntil = 0;  // 倒计时结束时刻(performance.now 基准)
 
   let leadMs = 800;    // 提前量:音符时刻前多少毫秒开始高亮
+  let firstNoteTime = Infinity; // 全曲第一个音符时刻:跟弹一开始(倒计时期间)第一个键就提前亮起提示
+  function leadFor(n) {
+    // 全曲第一个音符用更长的提前量,让玩家一开始就知道第一个要按的键
+    return (Math.abs(n.time - firstNoteTime) < 0.5) ? Math.max(leadMs, countdownMs + firstNoteTime) : leadMs;
+  }
   const JUDGE_WINDOW = 150; // 判定窗口 ±ms
   const MISS_WINDOW = 180;  // 超过此时长未按即 Miss
   const TOTAL = 15;
@@ -633,6 +670,33 @@
   }
   function applyScrollRows() {
     document.documentElement.style.setProperty('--scroll-rows', String(scrollRows));
+  }
+  // 谱面背景不透明度(0~0.95,默认 0.95;越小越透明,保存到 localStorage)
+  let scrollBgAlpha = 0.95;
+  const MIN_ALPHA = 0, MAX_ALPHA = 0.95, ALPHA_STEP = 0.05;
+  function loadScrollAlpha() {
+    try {
+      const v = parseFloat(localStorage.getItem('ov-scroll-alpha'));
+      if (!isNaN(v) && v >= MIN_ALPHA && v <= MAX_ALPHA) scrollBgAlpha = v;
+    } catch (e) { /* 忽略 */ }
+  }
+  function saveScrollAlpha() {
+    try { localStorage.setItem('ov-scroll-alpha', String(scrollBgAlpha)); } catch (e) { /* 忽略 */ }
+  }
+  function applyScrollAlpha() {
+    document.documentElement.style.setProperty('--scroll-bg-alpha', scrollBgAlpha.toFixed(2));
+  }
+  function alphaLabel(a) {
+    if (a <= 0.01) return '全透明';
+    if (a >= 0.9) return '不透明';
+    return Math.round((1 - a) * 100) + '%透明';
+  }
+  function changeScrollAlpha(delta) {
+    scrollBgAlpha = clamp(Math.round((scrollBgAlpha + delta) * 100) / 100, MIN_ALPHA, MAX_ALPHA);
+    applyScrollAlpha();
+    saveScrollAlpha();
+    $('alphaVal').textContent = alphaLabel(scrollBgAlpha);
+    showToast('谱面背景 ' + alphaLabel(scrollBgAlpha));
   }
   const scrollerEl = $('scroller');
   let scDrag = null;
@@ -971,7 +1035,7 @@
       const n = keyQueue[idx][curPtr[idx]];
       if (!n || n.hit) continue;
       const d = t - n.time;
-      if (d >= -leadMs && d <= MISS_WINDOW && n.time < nextTime) nextTime = n.time;
+      if (d >= -leadFor(n) && d <= MISS_WINDOW && n.time < nextTime) nextTime = n.time;
     }
     // 第二遍:渲染每个键的预备/下一个状态
     for (let idx = 0; idx < TOTAL; idx++) {
@@ -983,7 +1047,7 @@
         continue;
       }
       const d = t - n.time;
-      if (d < -leadMs) {             // 未到提前量,不亮
+      if (d < -leadFor(n)) {         // 未到提前量,不亮
         el.classList.remove('pending');
         clearPendingColor(el);
         clearNext(el);
@@ -1084,6 +1148,9 @@
     if (!song || !song.songNotes) { setStatus('无乐谱'); return; }
     keyQueue = buildQueue(song);
     if (keyQueue.every(q => q.length === 0)) { setStatus('无有效音符'); return; }
+    // 全曲第一个音符时刻:让它在跟弹一开始(倒计时期间)就提前亮起提示
+    firstNoteTime = Infinity;
+    keyQueue.forEach(q => { if (q.length && q[0].time < firstNoteTime) firstNoteTime = q[0].time; });
     if (countdownMs <= 0) { doStart(); return; }
     countdownUntil = performance.now() + countdownMs;
     // 把时钟基准设为倒计时结束时刻:倒计时期间 tick 就按提前量亮起第一个音并滚动谱面,
@@ -1196,6 +1263,7 @@
   const songPanel = $('songPanel');
   const songList = $('songList');
   let songCache = [];  // 当前完整曲目列表
+  let catSel = 'all';  // 当前分类筛选:all=全部 / __none__=未分类 / 其他为分类名
 
   function closeSongPanel() {
     songPanelOpen = false;
@@ -1220,17 +1288,58 @@
       }
     }
     $('songSearch').value = '';
+    renderSongCats();
     renderSongList();
+  }
+
+  // 渲染分类筛选条:从歌曲列表收集分类名
+  function renderSongCats() {
+    const cats = [];
+    const seen = {};
+    songCache.forEach((s) => {
+      const c = (s.category || '').trim();
+      if (!c || seen[c]) return;
+      seen[c] = true;
+      cats.push(c);
+    });
+    cats.sort((a, b) => a.localeCompare(b, 'zh'));
+    const el = $('songCats');
+    el.innerHTML = '';
+    const mk = (value, label) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'sp-cat' + (catSel === value ? ' active' : '');
+      b.textContent = label;
+      b.title = label;
+      b.addEventListener('click', () => {
+        catSel = value;
+        renderSongCats();
+        renderSongList();
+      });
+      el.appendChild(b);
+    };
+    mk('all', '全部');
+    mk('__none__', '未分类');
+    cats.forEach((c) => mk(c, '📁 ' + c));
   }
 
   function renderSongList() {
     const kw = ($('songSearch').value || '').trim().toLowerCase();
-    const filtered = kw
-      ? songCache.filter(s =>
-          (s.name || '').toLowerCase().includes(kw) || (s.author || '').toLowerCase().includes(kw))
-      : songCache;
+    let filtered = songCache;
+    if (catSel === '__none__') {
+      filtered = filtered.filter(s => !(s.category || '').trim());
+    } else if (catSel !== 'all') {
+      filtered = filtered.filter(s => (s.category || '').trim() === catSel);
+    }
+    if (kw) {
+      filtered = filtered.filter(s =>
+        (s.name || '').toLowerCase().includes(kw) || (s.author || '').toLowerCase().includes(kw));
+    }
     if (!filtered.length) {
-      songList.innerHTML = '<div class="song-loading">' + (kw ? '没有匹配的歌曲' : '没有可选的歌曲(可先到主窗口加载或收藏乐谱)') + '</div>';
+      const emptyMsg = !songCache.length
+        ? '没有可选的歌曲(可先到主窗口加载或收藏乐谱)'
+        : (kw ? '没有匹配的歌曲' : '该分类下没有歌曲');
+      songList.innerHTML = '<div class="song-loading">' + emptyMsg + '</div>';
       return;
     }
     const curName = (song && song.name) || '';
@@ -1251,7 +1360,7 @@
       row.appendChild(tag);
       row.appendChild(nameEl);
       row.appendChild(authorEl);
-      row.title = s.name + (s.author ? ' · ' + s.author : '');
+      row.title = s.name + (s.author ? ' · ' + s.author : '') + (s.category ? ' · 📁 ' + s.category : '');
       row.addEventListener('click', async () => {
         row.classList.add('err');
         try {
@@ -1284,6 +1393,7 @@
     } catch (e) {
       songCache = [];
     }
+    renderSongCats();
     renderSongList();
   });
   $('songSearch').addEventListener('input', renderSongList);
@@ -1386,6 +1496,11 @@
   applyScrollScale();
   loadScrollRows();
   applyScrollRows();
+  loadScrollAlpha();
+  applyScrollAlpha();
+  $('alphaVal').textContent = alphaLabel(scrollBgAlpha);
+  $('alphaDown').addEventListener('click', () => changeScrollAlpha(-ALPHA_STEP));
+  $('alphaUp').addEventListener('click', () => changeScrollAlpha(ALPHA_STEP));
   renderKeys();
   buildScroll();
   renderLead();
